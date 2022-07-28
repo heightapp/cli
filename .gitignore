@@ -1,0 +1,14 @@
+.idea/
+.DS_Store
+node_modules/
+npm-debug.log.*
+yarn-error.log
+
+## MacOS
+.DS_Store
+
+## User settings
+xcuserdata/
+
+## Config
+*.xcconfig
