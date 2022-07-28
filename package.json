@@ -12,5 +12,8 @@
   "bugs": {
     "url": "https://github.com/heightapp/height-cli/issues"
   },
-  "homepage": "https://github.com/heightapp/height-cli#readme"
+  "homepage": "https://github.com/heightapp/height-cli#readme",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
 }
