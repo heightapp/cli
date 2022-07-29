@@ -4,6 +4,8 @@ import open from 'open';
 import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
 import sharedClient from 'sharedClient';
 import output from 'output';
+import Client from 'client';
+import config from 'config';
 
 const GET_AUTHORIZATION_CODE_INTERVAL = 3000;
 
@@ -27,6 +29,12 @@ const getAuthorizationCode = async (readKey: string) => {
 }
 
 const login = async () => {
+  const existingCredentials = await config.get('credentials');
+  if (existingCredentials) {
+    output('You are already logged in.');
+    return;
+  }
+
   const {readKey, writeKey} = await sharedClient.auth.authorizationCodeKeys.get();
   const {code_verifier, code_challenge} = ((pkceChallenge as any).default as typeof pkceChallenge)(); // pkce-challenge is a commonjs module
 
@@ -51,7 +59,14 @@ const login = async () => {
   const code = await getAuthorizationCode(readKey)
 
   // Create tokens
-  await sharedClient.auth.accessToken.create({code, codeVerifier: code_verifier});
+  const credentials = await sharedClient.auth.accessToken.create({code, codeVerifier: code_verifier});
+
+  // Get userId
+  const client = new Client(credentials);
+  const user = await client.user.get();
+
+  // Save credentials and user in config
+  await config.update({credentials, user: {id: user.id, email: user.email}});
 
   output('You are logged in.');
 };

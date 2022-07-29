@@ -13,6 +13,10 @@ export type Config = {
     refreshToken: string;
     expiresAt: number;
   };
+  user?: {
+    id: string,
+    email: string,
+  }
 };
 
 // Helpers
@@ -50,6 +54,12 @@ const set = async <K extends keyof Config>(key: K, value: Config[K]) => {
   await saveConfig(updatedConfig);
 };
 
+const update = async <K extends keyof Config>(partialConfig: Partial<Config>) => {
+  const config = await getConfig();
+  const updatedConfig = {...config, ...partialConfig};
+  await saveConfig(updatedConfig);
+};
+
 const clear = async (key: keyof Config) => {
   const config = await getConfig();
   if (!config) {
@@ -63,5 +73,6 @@ const clear = async (key: keyof Config) => {
 export default {
   get,
   set,
+  update,
   clear,
 };

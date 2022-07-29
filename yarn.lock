@@ -65,6 +65,11 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.11.tgz#d421b6c527a3037f7c84433fd2c4229e016863d3"
   integrity sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==
 
+"@types/memoizee@^0.4.8":
+  version "0.4.8"
+  resolved "https://registry.yarnpkg.com/@types/memoizee/-/memoizee-0.4.8.tgz#04adc0c266a0f5d72db0556fdda2ba17dad9b519"
+  integrity sha512-qDpXKGgwKywnQt/64fH1O0LiPA++QGIYeykEUiZ51HymKVRLnUSGcRuF60IfpPeeXiuRwiR/W4y7S5VzbrgLCA==
+
 "@types/node@*", "@types/node@^18.6.2":
   version "18.6.2"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.6.2.tgz#ffc5f0f099d27887c8d9067b54e55090fcd54126"
