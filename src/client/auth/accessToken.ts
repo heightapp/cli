@@ -4,9 +4,9 @@ import fetch from 'node-fetch';
 
 const validateCreateOrRefreshData = (data: any): data is {access_token: string, refresh_token: string, expires_at: string} => {
   return (
-    data.access_token && typeof data.access_token === 'string' &&
-    data.refresh_token && typeof data.refresh_token === 'string' &&
-    data.expires_at && typeof data.expires_at === 'string'
+    !!data.access_token && typeof data.access_token === 'string' &&
+    !!data.refresh_token && typeof data.refresh_token === 'string' &&
+    !!data.expires_at && typeof data.expires_at === 'string'
   )
 }
 

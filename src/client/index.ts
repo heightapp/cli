@@ -3,6 +3,8 @@ import user from 'client/user';
 import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
 import env from 'env';
 import fetch from 'node-fetch';
+import userPreference from 'client/userPreference';
+import task from 'client/task';
 
 const EXPIRY_OFFSET = 2 * 60 * 1000; // 2 mins - to account for any request/other delay and be safe
 
@@ -60,6 +62,18 @@ class Client {
     }
   }
 
+  get userPreference() {
+    return {
+      get: userPreference.get(this),
+    }
+  }
+
+  get task() {
+    return {
+      create: task.create(this),
+    }
+  }
+
   constructor(credentials: ClientCredentials | null, onUpdatedCredentials?: (credentials: ClientCredentials | null) => void) {
     this._credentials = credentials;
     this.onUpdatedCredentials = onUpdatedCredentials;
@@ -95,7 +109,7 @@ class Client {
       throw new ClientError({message: 'Invalid credentials. Please reauthenticated.', code: ClientErrorCode.CredentialsInvalid, url});
     }
 
-    let data: any;
+    let data: any = undefined;
     try {
       data = await response.json();
     } catch (e) {

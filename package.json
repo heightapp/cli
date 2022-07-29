@@ -32,13 +32,19 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
+    "@types/git-diff-parser": "^1.0.1",
+    "@types/gitignore-parser": "^0.0.0",
     "@types/inquirer": "^8.2.1",
     "@types/memoizee": "^0.4.8",
     "@types/yargs": "^17.0.10",
+    "comment-patterns": "^0.12.2",
     "env-paths": "^3.0.0",
+    "git-diff-parser": "^1.0.0",
+    "gitignore-parser": "^0.0.2",
     "inquirer": "^9.0.2",
     "memoizee": "^0.4.15",
     "node-fetch": "^3.2.9",
+    "node-watch": "^0.7.3",
     "open": "^8.4.0",
     "pkce-challenge": "^3.0.0",
     "yargs": "^17.5.1"

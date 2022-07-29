@@ -2,15 +2,15 @@ import env from 'env';
 import pkceChallenge from 'pkce-challenge';
 import open from 'open';
 import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
-import sharedClient from 'sharedClient';
-import output from 'output';
+import sharedClient from 'helpers/sharedClient';
+import output from 'helpers/output';
 import Client from 'client';
-import config from 'config';
+import config from 'helpers/config';
 
 const GET_AUTHORIZATION_CODE_INTERVAL = 3000;
 
 // Try to get auth code every `GET_AUTHORIZATION_CODE_INTERVAL` interval
-const getAuthorizationCode = async (readKey: string) => {
+const getAuthorizationCode = (readKey: string) => {
   return new Promise<string>((resolve) => {
     setTimeout(async () => {
       try {
@@ -43,7 +43,7 @@ const login = async () => {
   url.pathname = 'oauth/authorization';
   url.searchParams.set('client_id', env.oauthClientId);
   url.searchParams.set('redirect_uri', env.oauthRedirectUrl);
-  url.searchParams.set('scope', `[${env.oauthScopes}]`);
+  url.searchParams.set('scope', `[${env.oauthScopes.toString()}]`);
   url.searchParams.set(
     'state',
     JSON.stringify({

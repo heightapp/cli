@@ -1,8 +1,8 @@
 import os from 'os';
 import path from 'path';
 import inquirer from 'inquirer';
-import config from 'config';
-import output from 'output';
+import config from 'helpers/config';
+import output from 'helpers/output';
 
 const add = async () => {
   // Ask for path to repository
@@ -13,7 +13,7 @@ const add = async () => {
   });
 
   // Cleanup path
-  const pathToAdd = path.resolve(repoToAdd.path.replace(/^~/, os.homedir())).trim();
+  const pathToAdd = path.resolve((repoToAdd.path as string).replace(/^~/, os.homedir())).trim();
 
   // Add repository to config
   let repositories = (await config.get('repositories')) ?? [];

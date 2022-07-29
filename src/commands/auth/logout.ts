@@ -1,6 +1,6 @@
-import config from 'config';
-import output from 'output';
-import sharedClient from 'sharedClient';
+import config from 'helpers/config';
+import output from 'helpers/output';
+import sharedClient from 'helpers/sharedClient';
 
 const logout = async () => {
   const existingCredentials = await config.get('credentials');

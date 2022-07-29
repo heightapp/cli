@@ -1,6 +1,6 @@
-import config from 'config';
+import config from 'helpers/config';
 import inquirer from 'inquirer';
-import output from 'output';
+import output from 'helpers/output';
 
 const rm = async () => {
   // Get repositories from config
@@ -27,7 +27,7 @@ const rm = async () => {
   await config.set('repositories', repositories);
 
   // Log message
-  output(`'${repoToRemove.path}' is not tracked anymore.`);
+  output(`'${repoToRemove.path as string}' is not tracked anymore.`);
 };
 
 export default rm;

@@ -1,5 +1,5 @@
-import config from 'config';
-import output from 'output';
+import config from 'helpers/config';
+import output from 'helpers/output';
 
 const list = async () => {
   // Get repositories from config

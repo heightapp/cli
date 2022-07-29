@@ -1,5 +1,5 @@
 import Client from 'client/index'
-import config from 'config';
+import config from 'helpers/config';
 
 const credentials = await config.get('credentials');
 

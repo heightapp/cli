@@ -44,6 +44,10 @@ const saveConfig = async (config: Config) => {
 
 // Exported
 
+const getAll = async (): Promise<Config> => {
+  return (await getConfig()) ?? {};
+}
+
 const get = async <K extends keyof Config>(key: K): Promise<Config[K] | undefined> => {
   return (await getConfig())?.[key];
 };
@@ -54,7 +58,7 @@ const set = async <K extends keyof Config>(key: K, value: Config[K]) => {
   await saveConfig(updatedConfig);
 };
 
-const update = async <K extends keyof Config>(partialConfig: Partial<Config>) => {
+const update = async (partialConfig: Partial<Config>) => {
   const config = await getConfig();
   const updatedConfig = {...config, ...partialConfig};
   await saveConfig(updatedConfig);
@@ -71,6 +75,7 @@ const clear = async (key: keyof Config) => {
 };
 
 export default {
+  getAll,
   get,
   set,
   update,
