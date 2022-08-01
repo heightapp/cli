@@ -13,9 +13,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-prod": "tsc && tsc-alias",
-    "build-dev": "tsc --outDir .dev && tsc-alias --dir=.dev",
-    "start": "npm run build-dev && node .dev/index.js",
+    "build": "tsc && tsc-alias",
+    "build-dev": "tsc --outDir dist && tsc-alias --dir=dist",
+    "start": "npm run build-dev && node dist/index.js",
     "lint": "eslint ./src"
   },
   "repository": "git+https://github.com/heightapp/height-cli.git",
