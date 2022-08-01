@@ -1,5 +1,5 @@
 {
-  "name": "@heightapp/height-cli",
+  "name": "@heightapp/cli",
   "version": "0.0.1",
   "description": "",
   "type": "module",
@@ -18,13 +18,13 @@
     "start": "npm run build-dev && node dist/index.js",
     "lint": "eslint ./src"
   },
-  "repository": "git+https://github.com/heightapp/height-cli.git",
+  "repository": "git+https://github.com/heightapp/cli.git",
   "author": "Height",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/heightapp/height-cli/issues"
+    "url": "https://github.com/heightapp/cli/issues"
   },
-  "homepage": "https://github.com/heightapp/height-cli#readme",
+  "homepage": "https://github.com/heightapp/cli#readme",
   "devDependencies": {
     "@types/node": "^18.6.2",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
