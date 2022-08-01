@@ -2,8 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 import envPaths from 'env-paths';
+import env from 'env';
 
-const CONFIG_PATH = path.resolve(envPaths('height', {suffix: 'cli'}).config, 'config.json');
+const CONFIG_PATH = path.resolve(envPaths(env.prod ? 'height' : 'height-dev', {suffix: 'cli'}).config, 'config.json');
 
 export type Config = Partial<{
   repositories: Array<{path: string}>;

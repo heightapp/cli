@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import auth from 'commands/auth';
 import env from 'env';
 import https from 'https';
