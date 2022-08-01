@@ -1,18 +1,13 @@
 import Client from 'client/index'
-import config from 'helpers/config';
+import keychain from 'helpers/keychain';
 
-const credentials = await config.get('credentials');
+const credentials = await keychain.getCredentials();
 
-const sharedClient = new Client(
-  credentials ? {
-    accessToken: credentials.accessToken,
-    refreshToken: credentials.refreshToken,
-    expiresAt: credentials.expiresAt,
-  } : null, async (newCredentials) => {
+const sharedClient = new Client(credentials, async (newCredentials) => {
     if (newCredentials) {
-      await config.set('credentials', newCredentials);
+      await keychain.setCredentials(newCredentials);
     } else {
-      await config.clear('credentials');
+      await keychain.clearCredentials();
     }
   }
 );

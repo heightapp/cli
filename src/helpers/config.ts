@@ -5,19 +5,14 @@ import envPaths from 'env-paths';
 
 const CONFIG_PATH = path.resolve(envPaths('height', {suffix: 'cli'}).config, 'config.json');
 
-export type Config = {
-  repositories?: Array<{path: string}>;
-  defaultListIds?: Array<string>;
-  credentials?: {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
-  };
-  user?: {
+export type Config = Partial<{
+  repositories: Array<{path: string}>;
+  defaultListIds: Array<string>;
+  user: {
     id: string,
     email: string,
   }
-};
+}>;
 
 // Helpers
 

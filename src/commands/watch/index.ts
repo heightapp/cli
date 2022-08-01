@@ -5,6 +5,7 @@ import GitRepo from 'helpers/gitRepo';
 import GitFile from 'helpers/gitFile';
 import TodoParser from 'commands/watch/helpers/todoParser';
 import sharedClient from 'helpers/sharedClient';
+import keychain from 'helpers/keychain';
 
 let todosInFlight: Array<Todo> = [];
 
@@ -88,7 +89,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath}: {userId: 
 
 const handler = async () => {
   const configValues = await config.getAll();
-  const credentials = configValues.credentials;
+  const credentials = await keychain.getCredentials();
   const user = configValues.user;
   if (!credentials || !user) {
     output('You need to be logged in to use `watch`. Please authenticate with the `auth login` command.');

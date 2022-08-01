@@ -1,9 +1,10 @@
 import config from 'helpers/config';
+import keychain from 'helpers/keychain';
 import output from 'helpers/output';
 import sharedClient from 'helpers/sharedClient';
 
 const logout = async () => {
-  const existingCredentials = await config.get('credentials');
+  const existingCredentials = await keychain.getCredentials();
   if (!existingCredentials) {
     output('You are not logged in.');
     return;

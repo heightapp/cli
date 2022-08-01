@@ -6,6 +6,7 @@ import sharedClient from 'helpers/sharedClient';
 import output from 'helpers/output';
 import Client from 'client';
 import config from 'helpers/config';
+import keychain from 'helpers/keychain';
 
 const GET_AUTHORIZATION_CODE_INTERVAL = 3000;
 
@@ -29,7 +30,7 @@ const getAuthorizationCode = (readKey: string) => {
 }
 
 const login = async () => {
-  const existingCredentials = await config.get('credentials');
+  const existingCredentials = await keychain.getCredentials();
   if (existingCredentials) {
     output('You are already logged in.');
     return;
@@ -66,7 +67,10 @@ const login = async () => {
   const user = await client.user.get();
 
   // Save credentials and user in config
-  await config.update({credentials, user: {id: user.id, email: user.email}});
+  await Promise.all([
+    keychain.setCredentials(credentials),
+    config.set('user', {id: user.id, email: user.email})
+  ])
 
   output('You are logged in.');
 };
