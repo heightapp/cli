@@ -4,13 +4,14 @@ import envPaths from './envPaths';
 
 const LOG_PATH = envPaths.log;
 
-const log = winston.createLogger({
+const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss'
     }),
     winston.format.json(),
+    winston.format.metadata(),
   ),
   transports: [
     // Write all errors logs to error file
@@ -29,9 +30,9 @@ const log = winston.createLogger({
 
 if (!env.prod) {
   // If we're not in prod, also log to console
-  log.add(new winston.transports.Console({
+  logger.add(new winston.transports.Console({
     format: winston.format.cli(),
   }));
 }
 
-export default log;
+export default logger;

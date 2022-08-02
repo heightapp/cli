@@ -1,6 +1,6 @@
 import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
 import env from 'env';
-import fetch from 'node-fetch';
+import request from 'helpers/request';
 
 const validateGetData = (data: any): data is {code: string} => {
   return (
@@ -13,11 +13,8 @@ const get = async ({readKey}: {readKey: string}): Promise<{code: string}> => {
   url.pathname = 'integrations/getCode';
   url.searchParams.set('readKey', readKey);
 
-  const response = await fetch(url.href, {
+  const response = await request(url.href, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
   });
 
   if (response.status < 200 || response.status >= 300) {
