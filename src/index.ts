@@ -9,6 +9,7 @@ import ClientError from 'client/helpers/clientError';
 import output from 'helpers/output';
 import watch from 'commands/watch';
 import logger from 'helpers/logger';
+import logs from 'commands/logs';
 
 // Allow self-signed certs in dev
 if (!env.prod) {
@@ -37,6 +38,7 @@ commandLine
   .command(auth)
   .command(repos)
   .command(watch)
+  .command(logs)
   .recommendCommands()
   .demandCommand(1)
   .fail((message, error, yargs) => {
