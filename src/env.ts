@@ -3,13 +3,13 @@ import path from 'path';
 
 dotenv.config({path: path.resolve('.env')});
 
-const defaultApiHost = 'api.height.app';
+const defaultApiHost = 'https://api.height.app';
 const apiHost = process.env.HEIGHT_API_HOST || defaultApiHost;
 
 const env = {
   prod: apiHost === defaultApiHost,
   apiHost,
-  webHost: process.env.HEIGHT_WEB_HOST || 'height.app',
+  webHost: process.env.HEIGHT_WEB_HOST || 'https://height.app',
   oauthRedirectUrl: (() => {
     const url = new URL(apiHost);
     url.pathname = 'oauth/authorizationCode';
