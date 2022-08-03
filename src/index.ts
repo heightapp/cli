@@ -46,10 +46,10 @@ commandLine
       return yargs.showHelp();
     }
 
-    logger.error(error.message ?? message);
+    logger.error(error?.message ?? message);
 
     if (!env.prod) {
-      throw error;
+      throw error ?? new Error(message ?? 'Unknown error');
     }
 
     if (message) {
