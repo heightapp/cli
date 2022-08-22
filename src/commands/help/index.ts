@@ -1,8 +1,9 @@
 
-import { CommandModule } from 'yargs';
-import {spawn} from 'child_process'
 import env from 'env';
-import { SCRIPT_NAME } from 'helpers/constants';
+import {SCRIPT_NAME} from 'helpers/constants';
+import {CommandModule} from 'yargs';
+
+import {spawn} from 'child_process';
 
 type Command = CommandModule<object, {
   command: Array<string>,
@@ -15,7 +16,7 @@ const handler: Command['handler'] = (args) => {
   spawn(command, commandArgs, {
     stdio: 'inherit',
   });
-}
+};
 
 const command: Command = {
   command: 'help <command..>',
@@ -25,7 +26,7 @@ const command: Command = {
       type: 'string',
       description: 'Command to get help for',
       demandOption: true,
-    }) as any
+    }) as any;
   },
   handler,
 };

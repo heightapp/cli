@@ -1,5 +1,5 @@
-import getDefault from 'client/view/getDefault'
+import getDefault from 'client/view/getDefault';
 
 export default {
   getDefault,
-}
+};

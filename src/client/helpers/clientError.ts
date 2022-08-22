@@ -29,7 +29,7 @@ class ClientError extends Error {
   }
 
   toString() {
-    const description = `An error ocurred`;
+    const description = 'An error ocurred';
     const url = this.url ? `at '${this.url}'` : null;
     const code = this.code ? `(code: ${this.code})` : null;
     const status = this.status ? `(status: ${this.status})` : null;

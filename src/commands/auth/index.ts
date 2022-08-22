@@ -1,13 +1,13 @@
-import commandLine from 'helpers/commandLine';
 import login from 'commands/auth/login';
 import logout from 'commands/auth/logout';
-import { CommandModule } from 'yargs';
+import commandLine from 'helpers/commandLine';
+import {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, object>
 
 const handler: Command['handler'] = () => {
   commandLine.showHelp();
-}
+};
 
 const command: Command = {
   command: 'auth',
@@ -15,7 +15,7 @@ const command: Command = {
   builder: (argv) => {
     return argv
       .command(login)
-      .command(logout)
+      .command(logout);
   },
   handler,
 };

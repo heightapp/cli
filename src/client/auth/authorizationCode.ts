@@ -1,4 +1,4 @@
-import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
+import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
 import env from 'env';
 import request from 'helpers/request';
 
@@ -6,7 +6,7 @@ const validateGetData = (data: any): data is {code: string} => {
   return (
     data.code && typeof data.code === 'string'
   );
-}
+};
 
 const get = async ({readKey}: {readKey: string}): Promise<{code: string}> => {
   const url = new URL(env.apiHost);
@@ -21,7 +21,7 @@ const get = async ({readKey}: {readKey: string}): Promise<{code: string}> => {
     throw new ClientError({
       status: response.status,
       url: url.href,
-      message: response.statusText
+      message: response.statusText,
     });
   }
 
@@ -32,7 +32,7 @@ const get = async ({readKey}: {readKey: string}): Promise<{code: string}> => {
     throw new ClientError({
       code: ClientErrorCode.AuthorizationCodeMissing,
       url: url.href,
-      message: response.statusText
+      message: response.statusText,
     });
   }
 
@@ -46,10 +46,10 @@ const get = async ({readKey}: {readKey: string}): Promise<{code: string}> => {
   }
 
   return {
-    code: data.code
+    code: data.code,
   };
 };
 
 export default {
   get,
-}
+};

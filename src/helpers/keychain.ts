@@ -1,4 +1,5 @@
 import keytar from 'keytar';
+
 import logger from './logger';
 
 type Credentials = {
@@ -17,7 +18,7 @@ const SERVICE = 'height-cli';
 const getCredentials = async () => {
   logger.info('Get credentials');
 
-  const json = await keytar.getPassword(SERVICE, ACCOUNT)
+  const json = await keytar.getPassword(SERVICE, ACCOUNT);
   if (!json) {
     return null;
   }
@@ -39,16 +40,15 @@ const setCredentials = async (credentials: Credentials) => {
 
   try {
     const json = JSON.stringify(credentials);
-    return keytar.setPassword(SERVICE, ACCOUNT, json)
+    await keytar.setPassword(SERVICE, ACCOUNT, json);
   } catch {
     // Ignore
   }
-
 };
 
-const clearCredentials = async() => {
+const clearCredentials = async () => {
   logger.info('Clear credentials');
-  return keytar.deletePassword(SERVICE, ACCOUNT)
+  return keytar.deletePassword(SERVICE, ACCOUNT);
 };
 
 export default {

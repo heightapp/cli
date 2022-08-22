@@ -1,8 +1,8 @@
+import {restartWatchIfRunning} from 'commands/watch';
 import config from 'helpers/config';
-import inquirer from 'inquirer';
 import output from 'helpers/output';
-import yargs, { CommandModule } from 'yargs';
-import { restartWatchIfRunning } from 'commands/watch';
+import inquirer from 'inquirer';
+import yargs, {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, {
   path?: string
@@ -17,11 +17,11 @@ const handler: Command['handler'] = async (args) => {
   }
 
   // Request user which repository to remove if there's no path in the args
-  const inputPath = await(async () => {
+  const inputPath = await (async () => {
     if (args.path) {
       return args.path;
     }
-    
+
     const result = await inquirer.prompt([
       {
         type: 'list',
@@ -33,16 +33,16 @@ const handler: Command['handler'] = async (args) => {
       },
     ]);
 
-    return result.path;
+    return result.path as string;
   })();
 
   // Save new repositories
   const newRepositories = repositories.filter((repo) => repo.path !== inputPath);
   if (newRepositories.length === repositories.length) {
-    output(`'${inputPath}' was not tracked.`);  
+    output(`'${inputPath}' was not tracked.`);
     return;
   }
-  
+
   await config.set('repositories', newRepositories);
 
   // Restart watch service if it's running to stop take into account old repos
@@ -60,7 +60,7 @@ const command: Command = {
       .positional('path', {
         type: 'string',
         description: 'Path to git repository',
-      })
+      });
   },
   handler,
 };

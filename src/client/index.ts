@@ -1,13 +1,13 @@
 import auth from 'client/auth';
-import user from 'client/user';
-import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
-import env from 'env';
-import userPreference from 'client/userPreference';
+import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
 import task from 'client/task';
+import user from 'client/user';
+import userPreference from 'client/userPreference';
 import view from 'client/view';
-import request from 'helpers/request';
+import env from 'env';
 import logger from 'helpers/logger';
-import { Response } from 'node-fetch';
+import request from 'helpers/request';
+import {Response} from 'node-fetch';
 
 const EXPIRY_OFFSET = 2 * 60 * 1000; // 2 mins - to account for any request/other delay and be safe
 
@@ -17,11 +17,11 @@ type ClientCredentials = {
   expiresAt: number;
 }
 class Client {
-  private _credentials: ClientCredentials | null;
-  private onUpdatedCredentials?: (credentials: ClientCredentials | null) => void
+  private privateCredentials: ClientCredentials | null;
+  private onUpdatedCredentials?: (credentials: ClientCredentials | null) => void;
 
   private get credentials() {
-    return this._credentials
+    return this.privateCredentials;
   }
 
   private set credentials(credentials: ClientCredentials | null) {
@@ -29,8 +29,8 @@ class Client {
       loggedIn: !!credentials,
     });
 
-    this._credentials = credentials;
-    this.onUpdatedCredentials?.(this._credentials);
+    this.privateCredentials = credentials;
+    this.onUpdatedCredentials?.(this.privateCredentials);
   }
 
   get auth() {
@@ -60,35 +60,35 @@ class Client {
           this.credentials = null;
         },
       },
-    }
+    };
   }
 
   get user() {
     return {
       get: user.get(this),
-    }
+    };
   }
 
   get userPreference() {
     return {
       get: userPreference.get(this),
-    }
+    };
   }
 
   get task() {
     return {
       create: task.create(this),
-    }
+    };
   }
 
   get view() {
     return {
       getDefault: view.getDefault(this),
-    }
+    };
   }
 
   constructor(credentials: ClientCredentials | null, onUpdatedCredentials?: (credentials: ClientCredentials | null) => void) {
-    this._credentials = credentials;
+    this.privateCredentials = credentials;
     this.onUpdatedCredentials = onUpdatedCredentials;
   }
 
@@ -99,9 +99,9 @@ class Client {
     }
 
     const url = (() => {
-      const url = new URL(env.apiHost);
-      url.pathname = path;
-      return url.href;
+      const u = new URL(env.apiHost);
+      u.pathname = path;
+      return u.href;
     })();
 
     if (!this.credentials) {
@@ -115,13 +115,12 @@ class Client {
       },
     });
 
-    let data: any = undefined;
+    let data: any;
     try {
       data = await response.json();
     } catch (e) {
       // Ignore for now, we'll handle it later
     }
-
 
     if (response.status === 401) {
       if (data?.error?.type === 'authtokenexpired') {
@@ -147,7 +146,7 @@ class Client {
     }
 
     throw new ClientError({message: data?.error?.message ?? 'Something weird happened. Please try again.', status: response.status, url});
-  }
+  };
 }
 
 export default Client;

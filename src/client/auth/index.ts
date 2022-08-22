@@ -6,4 +6,4 @@ export default {
   accessToken,
   authorizationCode,
   authorizationCodeKeys,
-}
+};

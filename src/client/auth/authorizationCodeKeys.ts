@@ -1,13 +1,13 @@
-import ClientError from "client/helpers/clientError";
+import ClientError from 'client/helpers/clientError';
 import env from 'env';
-import request from "helpers/request";
+import request from 'helpers/request';
 
 const validateGetData = (data: any): data is {readKey: string, writeKey: string} => {
   return (
     data.readKey && typeof data.readKey === 'string' &&
     data.writeKey && typeof data.writeKey === 'string'
   );
-}
+};
 
 const get = async () => {
   const url = new URL(env.apiHost);
@@ -21,7 +21,7 @@ const get = async () => {
     throw new ClientError({
       status: response.status,
       url: url.href,
-      message: response.statusText
+      message: response.statusText,
     });
   }
 
@@ -36,10 +36,10 @@ const get = async () => {
 
   return {
     readKey: data.readKey,
-    writeKey: data.writeKey
+    writeKey: data.writeKey,
   };
 };
 
 export default {
-  get
+  get,
 };

@@ -1,22 +1,22 @@
 #! /usr/bin/env node
 
-import "commonImports";
+import 'commonImports';
+import getDefaultListIds from 'clientHelpers/getDefaultListIds';
+import colors from 'colors/safe.js';
 import {watch} from 'commands/watch';
-import logger from 'helpers/logger';
 import config from 'helpers/config';
 import keychain from 'helpers/keychain';
-import colors from 'colors/safe.js';
-import platform, { Platform } from "helpers/platform";
-import switchImpossibleCase from "helpers/switchImpossibleCase";
-import sharedClient from "helpers/sharedClient";
-import getDefaultListIds from "clientHelpers/getDefaultListIds";
+import logger from 'helpers/logger';
+import platform, {Platform} from 'helpers/platform';
+import sharedClient from 'helpers/sharedClient';
+import switchImpossibleCase from 'helpers/switchImpossibleCase';
 
 switch (platform) {
   case Platform.Linux:
   case Platform.Mac: {
     // Force using colors for the service (since colors marks services not available for colors though we output to a log file)
     colors.enable();
-    break;      
+    break;
   }
   case Platform.Windows:
   case Platform.Other: {
@@ -37,7 +37,6 @@ if (!credentials) {
 // Refresh default listIds
 const defaultListIds = await getDefaultListIds(sharedClient);
 await config.set('defaultListIds', defaultListIds);
-
 
 // Verify we have repositories
 const {repositories} = await config.getAll();

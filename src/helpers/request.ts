@@ -1,4 +1,5 @@
 import nodeFetch from 'node-fetch';
+
 import logger from './logger';
 
 type Init = Parameters<typeof nodeFetch>[0];
@@ -35,16 +36,16 @@ const request = async (init: Init, options?: Options) => {
 
   // Log request finished
   if (response.status >= 200 && response.status < 300) {
-    logger.info(`Successful ${method} ${pathname} request`, {  
-      status: response.status
+    logger.info(`Successful ${method} ${pathname} request`, {
+      status: response.status,
     });
   } else {
-    logger.error(`Failed ${method} ${pathname} request`, {  
-      status: response.status
+    logger.error(`Failed ${method} ${pathname} request`, {
+      status: response.status,
     });
   }
 
   return response;
-}
+};
 
 export default request;

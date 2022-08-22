@@ -1,8 +1,9 @@
-import {exec as execSync} from 'child_process'
-import util from 'util';
 import gitDiffParser from 'git-diff-parser';
+
+import {exec as execSync} from 'child_process';
 import fs from 'fs';
 import readLine from 'readline';
+import util from 'util';
 
 const exec = util.promisify(execSync);
 
@@ -13,7 +14,7 @@ type Line = {
 
 class GitFile {
   private filePath: string;
-  private repoPath: string
+  private repoPath: string;
 
   constructor({filePath, repoPath}: {filePath: string, repoPath: string}) {
     this.filePath = filePath;
@@ -79,4 +80,4 @@ class GitFile {
   }
 }
 
-export default GitFile
+export default GitFile;

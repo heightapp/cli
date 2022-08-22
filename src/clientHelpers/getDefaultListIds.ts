@@ -1,4 +1,4 @@
-import Client from "client";
+import Client from 'client';
 
 const getDefaultListIds = async (client: Client) => {
   // Fetch user's default list
@@ -11,6 +11,6 @@ const getDefaultListIds = async (client: Client) => {
   // Fetch workspace's default list
   const workspaceDefaultList = await client.view.getDefault();
   return [workspaceDefaultList.id];
-}
+};
 
 export default getDefaultListIds;

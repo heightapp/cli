@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
+
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 // Load env from file
 const filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,6 @@ const env = {
   oauthScopes: ['api'],
   oauthClientId: process.env.HEIGHT_OAUTH_CLIENT_ID || 'aL9IGyJYm4ygMy0k8Sug8mAiYE4SaewGyasS2EcsCkm',
   debug: process.env.HEIGHT_DEBUG || false,
-}
+};
 
 export default env;

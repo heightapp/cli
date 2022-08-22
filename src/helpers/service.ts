@@ -1,17 +1,19 @@
-import { fileURLToPath } from "url";
-import path from 'path';
-import platform, { Platform } from 'helpers/platform';
-import logger from "helpers/logger";
-import switchImpossibleCase from "./switchImpossibleCase";
-import EventEmitter from "events";
+import logger from 'helpers/logger';
+import platform, {Platform} from 'helpers/platform';
+
+import EventEmitter from 'events';
 import os from 'os';
+import path from 'path';
+import {fileURLToPath} from 'url';
+
+import switchImpossibleCase from './switchImpossibleCase';
 
 type PlatformService = EventEmitter & {
-  exists: boolean | (() => boolean), 
-  start: () => void, 
+  exists: boolean | (() => boolean),
+  start: () => void,
   restart: () => void,
-  install: () => void, 
-  uninstall: () => void, 
+  install: () => void,
+  uninstall: () => void,
 }
 
 export enum ServiceType {
@@ -21,7 +23,7 @@ export enum ServiceType {
 class Service {
   static isSupported() {
     switch (platform) {
-      case Platform.Mac: 
+      case Platform.Mac:
       case Platform.Windows:
         return true;
       case Platform.Linux:
@@ -48,11 +50,12 @@ class Service {
     switch (type) {
       case ServiceType.Watch: {
         this.name = 'app.height.cli.watch';
-        this.description = 'Watch files and creates Height tasks for todos.'
-        this.script = path.resolve(root, 'dist/watch.js')
+        this.description = 'Watch files and creates Height tasks for todos.';
+        this.script = path.resolve(root, 'dist/watch.js');
         return;
       }
       default: {
+        switchImpossibleCase(type);
         throw new Error('Invalid service type');
       }
     }
@@ -60,28 +63,27 @@ class Service {
 
   private async createService(): Promise<PlatformService | null> {
     if (!Service.isSupported()) {
-      return null
+      return null;
     }
-    
+
     switch (platform) {
       case Platform.Mac: {
-        const {Service} = await import('node-mac');
-        return new Service({
+        const {Service: NodeService} = await import('node-mac');
+        return new NodeService({
           name: this.name,
           description: this.description,
           script: this.script,
           runAsAgent: true,
           logOnAsUser: true,
-        })
+        });
       }
       case Platform.Windows: {
-        const {Service} = await import('node-windows');
-        return new Service({
+        const {Service: NodeService} = await import('node-windows');
+        return new NodeService({
           name: this.name,
           description: this.description,
           script: this.script,
         });
-
       }
       case Platform.Linux:
       case Platform.Other: {
@@ -124,8 +126,8 @@ class Service {
       service.once('start', () => {
         logger.info(`Service '${this.type}' started`);
         resolve();
-      })
-      
+      });
+
       service.once('alreadyinstalled', () => {
         logger.info(`Service '${this.type}' already installed`);
         resolve();
@@ -134,7 +136,7 @@ class Service {
       service.once('install', () => {
         logger.info(`Service '${this.type}' installed`);
         service.start();
-      })
+      });
 
       service.once('invalidinstallation', () => {
         logger.error(`Service '${this.type}' has an invalid installation`);
@@ -152,7 +154,7 @@ class Service {
       });
 
       service.install();
-    })
+    });
   }
 
   async restart() {
@@ -165,7 +167,7 @@ class Service {
       service.once('start', () => {
         logger.info(`Service '${this.type}' restarted`);
         resolve();
-      })
+      });
 
       service.once('error', (error?: Error) => {
         logger.error(`Service '${this.type}' has encountered an error at restart: ${error?.message ?? 'Unknown error'}`);
@@ -176,7 +178,7 @@ class Service {
         logger.error(`Service '${this.type}' does not exist and cannot be restarted`);
         reject();
       });
-  
+
       service.restart();
     });
   }
@@ -191,8 +193,8 @@ class Service {
       service.once('uninstall', () => {
         logger.info(`Service '${this.type}' uninstalled`);
         resolve();
-      })
-      
+      });
+
       service.once('alreadyuninstalled', () => {
         logger.info(`Service '${this.type}' already uninstalled`);
         resolve();
@@ -209,7 +211,7 @@ class Service {
       });
 
       service.uninstall();
-    })
+    });
   }
 }
 

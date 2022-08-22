@@ -1,17 +1,17 @@
 #! /usr/bin/env node
 
-import "commonImports";
-import env from 'env';
+import 'commonImports';
+import ClientError from 'client/helpers/clientError';
 import auth from 'commands/auth';
-import repos from 'commands/repos';
 import help from 'commands/help';
 import logs from 'commands/logs';
+import repos from 'commands/repos';
 import watch from 'commands/watch';
+import env from 'env';
 import commandLine from 'helpers/commandLine';
-import output from 'helpers/output';
+import {SCRIPT_NAME} from 'helpers/constants';
 import logger from 'helpers/logger';
-import ClientError from 'client/helpers/clientError';
-import { SCRIPT_NAME } from "helpers/constants";
+import output from 'helpers/output';
 
 // Logs commands
 const loggerMiddleware: Parameters<typeof commandLine['middleware']>[0] = (args) => {
@@ -25,14 +25,15 @@ const loggerMiddleware: Parameters<typeof commandLine['middleware']>[0] = (args)
     }
 
     const option = `${key}=${args[key] as string}`;
-    return `${acc} ${option}`
+    return `${acc} ${option}`;
   }, args._.join(' '));
-  
+
   logger.info(`Executing command '${command}'`);
-}
+};
 
 // Handles failures
-const failMiddleware: Parameters<typeof commandLine['fail']>[0] = (message ,error, yargs) => {
+// eslint-disable-next-line consistent-return
+const failMiddleware: Parameters<typeof commandLine['fail']>[0] = (message, error, yargs) => {
   if (message?.startsWith('Not enough non-option arguments')) {
     return yargs.showHelp();
   }
@@ -50,10 +51,11 @@ const failMiddleware: Parameters<typeof commandLine['fail']>[0] = (message ,erro
   } else {
     output(`An unexpected error occurred: ${error.message}.`);
   }
-  process.exit(1);
-}
 
-commandLine
+  process.exit(1);
+};
+
+await commandLine
   .scriptName(SCRIPT_NAME)
   .middleware(loggerMiddleware)
   .command(watch)

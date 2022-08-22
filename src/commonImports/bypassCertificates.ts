@@ -1,6 +1,7 @@
 import env from 'env';
-import https from 'https';
 import logger from 'helpers/logger';
+
+import https from 'https';
 
 // Allow self-signed certs in dev
 if (env.nodeEnv !== 'production') {

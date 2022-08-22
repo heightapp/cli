@@ -1,14 +1,14 @@
-import commandLine from 'helpers/commandLine';
 import add from 'commands/repos/add';
 import list from 'commands/repos/list';
 import rm from 'commands/repos/rm';
-import { CommandModule } from 'yargs';
+import commandLine from 'helpers/commandLine';
+import {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, object>
 
 const handler: Command['handler'] = () => {
   commandLine.showHelp();
-}
+};
 
 const command: Command = {
   command: 'repo',

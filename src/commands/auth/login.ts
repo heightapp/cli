@@ -1,13 +1,13 @@
-import env from 'env';
-import pkceChallenge from 'pkce-challenge';
-import open from 'open';
-import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
-import sharedClient from 'helpers/sharedClient';
-import output from 'helpers/output';
 import Client from 'client';
+import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
+import env from 'env';
 import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
-import { CommandModule } from 'yargs';
+import output from 'helpers/output';
+import sharedClient from 'helpers/sharedClient';
+import open from 'open';
+import pkceChallenge from 'pkce-challenge';
+import {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, object>
 
@@ -18,7 +18,7 @@ const getAuthorizationCode = (readKey: string) => {
   return new Promise<string>((resolve, reject) => {
     setTimeout(async () => {
       try {
-        const {code} = await sharedClient.auth.authorizationCode.get({readKey})
+        const {code} = await sharedClient.auth.authorizationCode.get({readKey});
         resolve(code);
       } catch (e) {
         if (e instanceof ClientError && e.code === ClientErrorCode.AuthorizationCodeMissing) {
@@ -28,9 +28,9 @@ const getAuthorizationCode = (readKey: string) => {
           reject(e);
         }
       }
-    }, GET_AUTHORIZATION_CODE_INTERVAL)
-  })
-}
+    }, GET_AUTHORIZATION_CODE_INTERVAL);
+  });
+};
 
 const handler: Command['handler'] = async () => {
   const existingCredentials = await keychain.getCredentials();
@@ -41,7 +41,7 @@ const handler: Command['handler'] = async () => {
   }
 
   const {readKey, writeKey} = await sharedClient.auth.authorizationCodeKeys.get();
-  const {code_verifier, code_challenge} = ((pkceChallenge as any).default as typeof pkceChallenge)(); // pkce-challenge is a commonjs module
+  const {code_verifier: codeVerifier, code_challenge: codeChallenge} = ((pkceChallenge as any).default as typeof pkceChallenge)(); // pkce-challenge is a commonjs module
 
   // Open oauth
   logger.info('Open oauth url');
@@ -57,25 +57,25 @@ const handler: Command['handler'] = async () => {
       description: 'Please return to the CLI',
     }),
   );
-  url.searchParams.set('code_challenge', code_challenge);
+  url.searchParams.set('code_challenge', codeChallenge);
   url.searchParams.set('code_challenge_method', 'S256');
-  open(url.href);
+  await open(url.href);
 
   // Wait for the code to be available
   let code: string;
   try {
-    code = await getAuthorizationCode(readKey)
+    code = await getAuthorizationCode(readKey);
   } catch (e) {
     if (e instanceof ClientError && e.status === 404) {
       output('You seem to have denied access.', 'Please try again of contact support if you think this is an error.');
       return;
     }
-    
+
     throw e;
   }
 
   // Create tokens
-  const credentials = await sharedClient.auth.accessToken.create({code, codeVerifier: code_verifier});
+  const credentials = await sharedClient.auth.accessToken.create({code, codeVerifier});
 
   // Get userId
   const client = new Client(credentials);

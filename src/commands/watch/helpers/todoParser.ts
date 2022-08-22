@@ -81,5 +81,4 @@ class TodoParser {
   }
 }
 
-
 export default TodoParser;

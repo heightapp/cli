@@ -1,9 +1,11 @@
-import env from 'env';
-import winston from 'winston';
-import envPaths from './envPaths';
-import path from 'path';
 import colors from 'colors/safe.js';
+import env from 'env';
 import leftPad from 'left-pad';
+import winston from 'winston';
+
+import path from 'path';
+
+import envPaths from './envPaths';
 import 'winston-daily-rotate-file';
 
 const LOG_PATH = envPaths.log;
@@ -18,13 +20,13 @@ const logger = winston.createLogger({
   format: winston.format.combine(
     winston.format.metadata(),
     winston.format.timestamp({
-      format: 'YYYY-MM-DD HH:mm:ss'
+      format: 'YYYY-MM-DD HH:mm:ss',
     }),
     winston.format.printf((info) => {
       const timestamp = colors.green(info.timestamp as string);
       const levelColor = info.level === 'error' ? colors.red : colors.blue;
       const level = levelColor(leftPad(info.level, 7));
-      const message = info.message;
+      const message = info.message as string;
       const metadata = typeof info.metadata === 'object' && Object.keys(info.metadata as object).length ? colors.gray(` ${JSON.stringify(info.metadata)}`) : '';
       return `${timestamp} ${level} - ${message}${metadata}`;
     }),
@@ -34,7 +36,7 @@ const logger = winston.createLogger({
     new winston.transports.DailyRotateFile({
       level: 'error',
       dirname: LOG_PATH,
-      filename: ERROR_FILE_NAME, 
+      filename: ERROR_FILE_NAME,
       maxSize: '2m',
       maxFiles: 1,
       createSymlink: true,

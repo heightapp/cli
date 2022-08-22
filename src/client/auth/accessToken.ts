@@ -1,5 +1,5 @@
-import env from 'env'
-import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
+import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
+import env from 'env';
 import log from 'helpers/logger';
 import request from 'helpers/request';
 
@@ -8,8 +8,8 @@ const validateCreateOrRefreshData = (data: any): data is {access_token: string, 
     !!data.access_token && typeof data.access_token === 'string' &&
     !!data.refresh_token && typeof data.refresh_token === 'string' &&
     !!data.expires_at && typeof data.expires_at === 'string'
-  )
-}
+  );
+};
 
 const create = async ({code, codeVerifier}: {code: string; codeVerifier: string}) => {
   const url = new URL(env.apiHost);
@@ -36,7 +36,7 @@ const create = async ({code, codeVerifier}: {code: string; codeVerifier: string}
     throw new ClientError({
       status: response.status,
       url: url.href,
-      message: response.statusText
+      message: response.statusText,
     });
   }
 
@@ -45,7 +45,7 @@ const create = async ({code, codeVerifier}: {code: string; codeVerifier: string}
     throw new ClientError({
       status: 400,
       url: url.href,
-      message: 'Invalid payload'
+      message: 'Invalid payload',
     });
   }
 
@@ -101,7 +101,7 @@ const refresh = async ({refreshToken}: {refreshToken: string}) => {
     throw new ClientError({
       status: 400,
       url: url.href,
-      message: 'Invalid payload'
+      message: 'Invalid payload',
     });
   }
 
@@ -114,7 +114,7 @@ const refresh = async ({refreshToken}: {refreshToken: string}) => {
 
 const revoke = async ({refreshToken}: {refreshToken: string}) => {
   const url = new URL(env.apiHost);
-  url.pathname = `oauth/tokens/revoke`;
+  url.pathname = 'oauth/tokens/revoke';
 
   const response = await request(url.href, {
     method: 'POST',
@@ -131,10 +131,10 @@ const revoke = async ({refreshToken}: {refreshToken: string}) => {
       message: response.statusText,
     });
   }
-}
+};
 
 export default {
   create,
   refresh,
   revoke,
-}
+};

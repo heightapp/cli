@@ -1,10 +1,11 @@
-import os from 'os';
-import path from 'path';
-import inquirer from 'inquirer';
+import {restartWatchIfRunning} from 'commands/watch';
 import config from 'helpers/config';
 import output from 'helpers/output';
-import { CommandModule } from 'yargs';
-import { restartWatchIfRunning } from 'commands/watch';
+import inquirer from 'inquirer';
+import {CommandModule} from 'yargs';
+
+import os from 'os';
+import path from 'path';
 
 type Command = CommandModule<object, {
   path?: string,
@@ -53,7 +54,7 @@ const command: Command = {
       .positional('path', {
         type: 'string',
         description: 'Path to git repository',
-      })
+      });
   },
   handler,
 };

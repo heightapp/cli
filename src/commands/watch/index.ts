@@ -1,19 +1,19 @@
+import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
+import getDefaultListIds from 'clientHelpers/getDefaultListIds';
+import login from 'commands/auth/login';
 import addRepo from 'commands/repos/add';
-import config from 'helpers/config';
-import output from 'helpers/output';
-import GitRepo from 'helpers/gitRepo';
-import GitFile from 'helpers/gitFile';
 import TodoParser from 'commands/watch/helpers/todoParser';
-import sharedClient from 'helpers/sharedClient';
+import config from 'helpers/config';
+import {SCRIPT_NAME} from 'helpers/constants';
+import GitFile from 'helpers/gitFile';
+import GitRepo from 'helpers/gitRepo';
 import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
-import { CommandModule } from 'yargs';
-import Service, { ServiceType } from 'helpers/service';
+import output from 'helpers/output';
+import Service, {ServiceType} from 'helpers/service';
+import sharedClient from 'helpers/sharedClient';
 import inquirer from 'inquirer';
-import login from 'commands/auth/login';
-import { SCRIPT_NAME } from 'helpers/constants';
-import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
-import getDefaultListIds from 'clientHelpers/getDefaultListIds';
+import {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, {
   service?: boolean
@@ -79,7 +79,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
     todosInFlight.push(...newTodos);
     newTodos.forEach(async (todo) => {
       // Create task
-      let newTask: {index: number, name: string} | undefined = undefined;
+      let newTask: {index: number, name: string} | undefined;
       try {
         logger.info(`Create task with name '${todo.name}'`);
         newTask = await sharedClient.task.create({name: todo.name, listIds, assigneesIds: [userId]});
@@ -89,10 +89,10 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
         if (e instanceof ClientError) {
           // Stop watch if we are not logged in
           if (e.code === ClientErrorCode.CredentialsInvalid) {
-            output(`You credentials are invalid and were probably revoked. Please restart watch to login again.`);
+            output('You credentials are invalid and were probably revoked. Please restart watch to login again.');
             onStop();
           } else if (e.code === ClientErrorCode.CredentialsMissing) {
-            output(`You credentials are missing. Please restart watch to login again.`);
+            output('You credentials are missing. Please restart watch to login again.');
             onStop();
           }
         }
@@ -116,9 +116,8 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
         return !isTodoEqual(todoInFlight, todo);
       });
     });
-  }
+  };
 };
-
 
 export const watch = ({repositories, userId, listIds}: {repositories: Array<{path: string}>, userId: string, listIds: Array<string>}) => {
   // Log how many repositories we're watching
@@ -134,12 +133,12 @@ export const watch = ({repositories, userId, listIds}: {repositories: Array<{pat
       onStop: async () => {
         const watcher = await watcherPromise;
         watcher.close();
-      }
-    })
-    
+      },
+    });
+
     watcherPromise = new GitRepo({path}).watch(handler);
   });
-}
+};
 
 export const restartWatchIfRunning = async () => {
   if (!Service.isSupported()) {
@@ -152,7 +151,7 @@ export const restartWatchIfRunning = async () => {
   }
 
   await service.restart();
-}
+};
 
 const handler: Command['handler'] = async (args) => {
   const service = new Service(ServiceType.Watch);
@@ -171,7 +170,7 @@ const handler: Command['handler'] = async (args) => {
   if (!repositories?.length) {
     throw new Error('Missing repository. They should have been configured by now.');
   }
-  
+
   // Authenticate if needed
   let credentials = await keychain.getCredentials();
   if (!credentials) {
@@ -205,7 +204,7 @@ const handler: Command['handler'] = async (args) => {
     }
 
     if (args.service !== undefined) {
-      return args.service
+      return args.service;
     }
 
     return (await inquirer.prompt({
@@ -215,7 +214,7 @@ const handler: Command['handler'] = async (args) => {
       default: true,
     })).confirm as boolean;
   })();
- 
+
   if (runAsService) {
     await service.start({onPassword: async () => {
       return (await inquirer.prompt({
@@ -224,7 +223,7 @@ const handler: Command['handler'] = async (args) => {
         message: 'You password is required to run watch in the background',
       })).password;
     }});
-    
+
     output(`Watch is now running in the background and watching ${repositories.length} ${repositories.length > 1 ? 'repositories…' : 'repository…'}`);
   } else {
     output(`Watching ${repositories.length} ${repositories.length > 1 ? 'repositories' : 'repository'}…`);
@@ -243,7 +242,7 @@ const command: Command = {
           output('Watch is not running.');
           return;
         }
-  
+
         await service.stop();
         output('Watch has been stopped.');
       })
@@ -253,13 +252,13 @@ const command: Command = {
           output('Watch is not running.');
           return;
         }
-  
+
         await service.restart();
         output('Watch has been restarted.');
       }).options('service', {
         boolean: true,
         description: 'Run watch in the background',
-      })
+      });
     }
 
     return argv;

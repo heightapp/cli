@@ -1,6 +1,6 @@
 import config from 'helpers/config';
 import output from 'helpers/output';
-import { CommandModule } from 'yargs';
+import {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, object>
 

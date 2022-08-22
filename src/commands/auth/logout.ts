@@ -3,7 +3,7 @@ import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
 import output from 'helpers/output';
 import sharedClient from 'helpers/sharedClient';
-import { CommandModule } from 'yargs';
+import {CommandModule} from 'yargs';
 
 type Command = CommandModule<object, object>
 
@@ -18,7 +18,7 @@ const handler: Command['handler'] = async () => {
   // Revoke automatically clears the credentials through sharedClient, so no need to clear here
   await sharedClient.auth.accessToken.revoke();
   await config.clear('defaultListIds');
-  
+
   logger.info('User is logged out');
   output('You are logged out.');
 };
