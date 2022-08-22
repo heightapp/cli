@@ -2,7 +2,16 @@ import commentPatterns from 'comment-patterns';
 import escapeStringRegexp from 'escape-string-regexp';
 import memoize from 'memoizee';
 
+import path from 'path';
+
 const TODO_PATTERN = 'TODO(?!:?\\s+T-\\d+):?\\s+(.*)';
+
+// Map extensions not supported by commentPatterns to their original ones
+const EXTENSION_MAP: Record<string, string> = {
+  cjs: 'js',
+  jsx: 'js',
+  tsx: 'ts',
+};
 
 // Find prefix to use to find comments based on the filePath (language type)
 const fileCommentPrefixes = memoize(
@@ -10,7 +19,13 @@ const fileCommentPrefixes = memoize(
     let patterns: ReturnType<typeof commentPatterns> | null = null;
 
     try {
-      patterns = commentPatterns(filePath);
+      const extension = path.extname(filePath).substring(1);
+      const mappedExtension = EXTENSION_MAP[extension];
+      if (mappedExtension) {
+        patterns = commentPatterns(`${filePath.substring(0, filePath.length - extension.length)}${mappedExtension}`);
+      } else {
+        patterns = commentPatterns(filePath);
+      }
     } catch (e) {
       return null;
     }
