@@ -1,3 +1,4 @@
+import env from 'env';
 import keytar from 'keytar';
 
 import logger from './logger';
@@ -13,7 +14,7 @@ type Credentials = {
 }
 
 const ACCOUNT = 'height';
-const SERVICE = 'height-cli';
+const SERVICE = env.nodeEnv === 'production' ? 'height-cli' : 'height-cli-dev';
 
 const getCredentials = async () => {
   logger.info('Get credentials');
