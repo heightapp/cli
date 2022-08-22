@@ -6,13 +6,13 @@ declare module 'comment-patterns' {
         name?: string;
         nameMatchers?: Array<string>;
         multiLineComment?: Array<{
-          start?: RegExp;
+          start?: RegExp | string;
           middle?: string;
-          end?: string;
+          end?: RegExp | string;
           apidoc?: boolean;
         }>;
         singleLineComment?: Array<{
-          start?: string;
+          start?: RegExp | string;
         }>;
       }
     | undefined

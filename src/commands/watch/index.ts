@@ -30,6 +30,7 @@ type Todo = {
     path: string;
     line: FileLine;
     prefix: string;
+    suffix?: string;
   };
 };
 
@@ -59,6 +60,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
             path: filePath,
             line,
             prefix: todo.prefix,
+            suffix: todo.suffix,
           },
         });
       }
@@ -107,7 +109,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
         await file.updateLine({
           lineIndex: todo.file.line.index,
           previousContent: todo.file.line.text,
-          newContent: `${todo.file.prefix}T-${newTask.index} ${newTask.name}`,
+          newContent: `${todo.file.prefix}T-${newTask.index} ${newTask.name}${todo.file.suffix ? ` ${todo.file.suffix}` : ''}`,
         });
       }
 
