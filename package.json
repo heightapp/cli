@@ -1,6 +1,6 @@
 {
   "name": "@heightapp/cli",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "",
   "type": "module",
   "engines": {
@@ -10,11 +10,11 @@
     "height": "dist/cli.js"
   },
   "scripts": {
-    "prepare": "NODE_ENV=production ./scripts/build.js",
     "build": "NODE_ENV=production ./scripts/build.js",
     "dev": "./scripts/build.js && node dist/cli.js",
     "debug": "HEIGHT_DEBUG=true ./scripts/build.js && node dist/cli.js",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "prepare": "npm run build"
   },
   "repository": "git+https://github.com/heightapp/cli.git",
   "author": "Height",
