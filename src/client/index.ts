@@ -2,9 +2,10 @@ import auth from 'client/auth';
 import user from 'client/user';
 import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
 import env from 'env';
-import fetch from 'node-fetch';
 import userPreference from 'client/userPreference';
 import task from 'client/task';
+import request from 'helpers/request';
+import logger from 'helpers/logger';
 
 const EXPIRY_OFFSET = 2 * 60 * 1000; // 2 mins - to account for any request/other delay and be safe
 
@@ -22,6 +23,10 @@ class Client {
   }
 
   private set credentials(credentials: ClientCredentials | null) {
+    logger.info('Init client', {
+      loggedIn: !!credentials,
+    });
+
     this._credentials = credentials;
     this.onUpdatedCredentials?.(this._credentials);
   }
@@ -44,12 +49,12 @@ class Client {
           return this.credentials;
         },
         revoke: async () => {
-          const accessToken = this.credentials?.accessToken;
-          if (!accessToken) {
+          const refreshToken = this.credentials?.refreshToken;
+          if (!refreshToken) {
             throw new ClientError({message: 'You are already logged out.', code: ClientErrorCode.CredentialsMissing, url: undefined});
           }
 
-          await auth.accessToken.revoke({accessToken});
+          await auth.accessToken.revoke({refreshToken});
           this.credentials = null;
         },
       },
@@ -79,7 +84,7 @@ class Client {
     this.onUpdatedCredentials = onUpdatedCredentials;
   }
 
-  request = async <Data extends object>(path: string, options?: Parameters<typeof fetch>[1]) => {
+  request = async <Data extends object>(path: string, options?: Parameters<typeof request>[1]) => {
     // If token is expired, refresh
     if (this.credentials && this.credentials.expiresAt < Date.now() + EXPIRY_OFFSET) {
       await this.auth.accessToken.refresh();
@@ -95,11 +100,9 @@ class Client {
       throw new ClientError({message: 'You are not logged in.', code: ClientErrorCode.CredentialsMissing, url});
     }
 
-    // Execute request
-    const response = await fetch(url, {
+    const response = await request(url, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${this.credentials.accessToken}`,
       },
     });

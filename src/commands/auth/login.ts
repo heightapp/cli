@@ -7,6 +7,7 @@ import output from 'helpers/output';
 import Client from 'client';
 import config from 'helpers/config';
 import keychain from 'helpers/keychain';
+import logger from 'helpers/logger';
 
 const GET_AUTHORIZATION_CODE_INTERVAL = 3000;
 
@@ -32,6 +33,7 @@ const getAuthorizationCode = (readKey: string) => {
 const login = async () => {
   const existingCredentials = await keychain.getCredentials();
   if (existingCredentials) {
+    logger.info('Tried to log in but already logged in');
     output('You are already logged in.');
     return;
   }
@@ -40,6 +42,7 @@ const login = async () => {
   const {code_verifier, code_challenge} = ((pkceChallenge as any).default as typeof pkceChallenge)(); // pkce-challenge is a commonjs module
 
   // Open oauth
+  logger.info('Open oauth url');
   const url = new URL(env.webHost);
   url.pathname = 'oauth/authorization';
   url.searchParams.set('client_id', env.oauthClientId);
@@ -67,11 +70,13 @@ const login = async () => {
   const user = await client.user.get();
 
   // Save credentials and user in config
+  logger.info('Save credentials and user');
   await Promise.all([
     keychain.setCredentials(credentials),
     config.set('user', {id: user.id, email: user.email})
   ])
 
+  logger.info(`User is logged in: ${user.email}`);
   output('You are logged in.');
 };
 

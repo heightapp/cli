@@ -1,10 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import envPaths from './envPaths';
+import logger from './logger';
 
-import envPaths from 'env-paths';
-import env from 'env';
-
-const CONFIG_PATH = path.resolve(envPaths(env.prod ? 'height' : 'height-dev', {suffix: 'cli'}).config, 'config.json');
+const CONFIG_PATH = path.resolve(envPaths.config, 'config.json');
 
 export type Config = Partial<{
   repositories: Array<{path: string}>;
@@ -40,27 +39,42 @@ const saveConfig = async (config: Config) => {
 
 // Exported
 
+const stringify = (object: any) => {
+  try {
+    return JSON.stringify(object);
+  } catch {
+    return '{}';
+  }
+}
+
 const getAll = async (): Promise<Config> => {
-  return (await getConfig()) ?? {};
+  const config = (await getConfig()) ?? {}
+  logger.info(`Config - getAll: ${stringify(config)}`)
+  return config;
 }
 
 const get = async <K extends keyof Config>(key: K): Promise<Config[K] | undefined> => {
+  const value = (await getConfig())?.[key]
+  logger.info(`Config - get: ${key}: ${stringify(value)}`)
   return (await getConfig())?.[key];
 };
 
 const set = async <K extends keyof Config>(key: K, value: Config[K]) => {
+  logger.info(`Config - set: ${key}: ${stringify(value)}`)
   const config = await getConfig();
   const updatedConfig = {...config, [key]: value};
   await saveConfig(updatedConfig);
 };
 
 const update = async (partialConfig: Partial<Config>) => {
+  logger.info(`Config - update: ${stringify(partialConfig)}`)
   const config = await getConfig();
   const updatedConfig = {...config, ...partialConfig};
   await saveConfig(updatedConfig);
 };
 
 const clear = async (key: keyof Config) => {
+  logger.info(`Config - clear ${key}`)
   const config = await getConfig();
   if (!config) {
     return;

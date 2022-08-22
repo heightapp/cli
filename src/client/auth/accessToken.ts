@@ -1,6 +1,7 @@
 import env from 'env'
 import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
-import fetch from 'node-fetch';
+import log from 'helpers/logger';
+import request from 'helpers/request';
 
 const validateCreateOrRefreshData = (data: any): data is {access_token: string, refresh_token: string, expires_at: string} => {
   return (
@@ -14,19 +15,21 @@ const create = async ({code, codeVerifier}: {code: string; codeVerifier: string}
   const url = new URL(env.apiHost);
   url.pathname = 'oauth/tokens';
 
-  const response = await fetch(url.href, {
+  const response = await request(url.href, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+    body: {
       code,
       client_id: env.oauthClientId,
       redirect_uri: env.oauthRedirectUrl,
       grant_type: 'authorization_code',
       scope: env.oauthScopes,
       code_verifier: codeVerifier,
-    }),
+    },
+  });
+
+  log.info('Finished access token request', {
+    url: url.href,
+    status: response.status,
   });
 
   if (response.status < 200 || response.status >= 300) {
@@ -37,7 +40,7 @@ const create = async ({code, codeVerifier}: {code: string; codeVerifier: string}
     });
   }
 
-  const data = (await response.json()) as any;
+  const data = (await response.json());
   if (!validateCreateOrRefreshData(data)) {
     throw new ClientError({
       status: 400,
@@ -57,18 +60,24 @@ const refresh = async ({refreshToken}: {refreshToken: string}) => {
   const url = new URL(env.apiHost);
   url.pathname = 'oauth/tokens';
 
-  const response = await fetch(url.href, {
-    body: JSON.stringify({
+  log.info('Start access token refresh', {
+    url: url.href,
+  });
+
+  const response = await request(url.href, {
+    method: 'POST',
+    body: {
       client_id: env.oauthClientId,
       redirect_uri: env.oauthRedirectUrl,
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
       scope: env.oauthScopes,
-    }),
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
     },
+  });
+
+  log.info('Finished access token refresh', {
+    url: url.href,
+    status: response.status,
   });
 
   if (response.status >= 400 && response.status < 500) {
@@ -87,7 +96,7 @@ const refresh = async ({refreshToken}: {refreshToken: string}) => {
     });
   }
 
-  const data = (await response.json()) as any;
+  const data = (await response.json());
   if (!validateCreateOrRefreshData(data)) {
     throw new ClientError({
       status: 400,
@@ -103,12 +112,16 @@ const refresh = async ({refreshToken}: {refreshToken: string}) => {
   };
 };
 
-const revoke = async ({accessToken}: {accessToken: string}) => {
+const revoke = async ({refreshToken}: {refreshToken: string}) => {
   const url = new URL(env.apiHost);
-  url.pathname = `oauth/tokens/${encodeURIComponent(accessToken)}`;
+  url.pathname = `oauth/tokens/revoke`;
 
-  const response = await fetch(url.href, {
-    method: 'DELETE',
+  const response = await request(url.href, {
+    method: 'POST',
+    body: {
+      token: refreshToken,
+      token_type_hint: 'refresh_token',
+    },
   });
 
   if (response.status < 200 || response.status >= 300) {

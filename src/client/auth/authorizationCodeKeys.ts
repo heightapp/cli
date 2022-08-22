@@ -1,6 +1,6 @@
 import ClientError from "client/helpers/clientError";
 import env from 'env';
-import fetch from 'node-fetch';
+import request from "helpers/request";
 
 const validateGetData = (data: any): data is {readKey: string, writeKey: string} => {
   return (
@@ -13,11 +13,8 @@ const get = async () => {
   const url = new URL(env.apiHost);
   url.pathname = 'integrations/getKeys';
 
-  const response = await fetch(url.href, {
+  const response = await request(url.href, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
   });
 
   if (response.status < 200 || response.status >= 300) {

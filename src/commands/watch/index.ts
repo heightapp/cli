@@ -6,6 +6,7 @@ import GitFile from 'helpers/gitFile';
 import TodoParser from 'commands/watch/helpers/todoParser';
 import sharedClient from 'helpers/sharedClient';
 import keychain from 'helpers/keychain';
+import logger from 'helpers/logger';
 
 let todosInFlight: Array<Todo> = [];
 
@@ -69,6 +70,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath}: {userId: 
     newTodos.forEach(async (todo) => {
       // Create task
       const newTask = await sharedClient.task.create({name: todo.name, listIds, assigneesIds: [userId]});
+      logger.info(`Create task with name '${todo.name}'`);
 
       if (newTask) {
         // Update line of file with task index and todo description
@@ -121,6 +123,7 @@ const handler = async () => {
   }
 
   // Log how many repositories we're watching
+  logger.info(`Started watching ${repositories.length} repositories`);
   output(`Watching ${repositories.length} repositories…`);
 
   // Watch each repository
