@@ -22,5 +22,9 @@ module.exports = {
     '@typescript-eslint/no-floating-promises': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     "@typescript-eslint/restrict-template-expressions": 'off',
+    "@typescript-eslint/no-unsafe-call": 'off',
+    "default-case": 'error',
+    'prefer-const': 'off',
+    'no-use-before-define': 'off',
   }
 };

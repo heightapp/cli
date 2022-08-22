@@ -8,10 +8,6 @@ const CONFIG_PATH = path.resolve(envPaths.config, 'config.json');
 export type Config = Partial<{
   repositories: Array<{path: string}>;
   defaultListIds: Array<string>;
-  user: {
-    id: string,
-    email: string,
-  }
 }>;
 
 // Helpers

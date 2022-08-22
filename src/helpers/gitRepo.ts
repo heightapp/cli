@@ -25,7 +25,7 @@ class GitRepo {
 
   async watch(onChange: (filePath: string) => void) {
     const gitIgnore = await this.parseGitIgnore();
-    watch(this.path, {
+    return watch(this.path, {
       recursive: true,
     }, (eventType, filePath) => {
       if (eventType === 'update') {

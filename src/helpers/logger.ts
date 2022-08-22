@@ -2,7 +2,7 @@ import env from 'env';
 import winston from 'winston';
 import envPaths from './envPaths';
 import path from 'path';
-import colors from 'colors';
+import colors from 'colors/safe.js';
 import leftPad from 'left-pad';
 import 'winston-daily-rotate-file';
 
@@ -52,8 +52,8 @@ const logger = winston.createLogger({
   ],
 });
 
-if (!env.prod) {
-  // If we're not in prod, also log to console
+if (env.nodeEnv !== 'production' && env.debug) {
+  // Add log to console for debugging
   logger.add(new winston.transports.Console());
 }
 

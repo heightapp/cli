@@ -7,8 +7,17 @@ import TodoParser from 'commands/watch/helpers/todoParser';
 import sharedClient from 'helpers/sharedClient';
 import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
+import { CommandModule } from 'yargs';
+import Service, { ServiceType } from 'helpers/service';
+import inquirer from 'inquirer';
+import login from 'commands/auth/login';
+import { SCRIPT_NAME } from 'helpers/constants';
+import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
+import getDefaultListIds from 'clientHelpers/getDefaultListIds';
 
-let todosInFlight: Array<Todo> = [];
+type Command = CommandModule<object, {
+  service?: boolean
+}>;
 
 type FileLine = {
   text: string;
@@ -24,13 +33,14 @@ type Todo = {
   };
 };
 
+let todosInFlight: Array<Todo> = [];
+
 const isTodoEqual = (task1: Todo, task2: Todo): boolean => {
   return task1.name === task2.name || (task1.file.path === task2.file.path && task1.file.line.index === task2.file.line.index);
 };
 
-const createHandleRepositoryFileChange = ({userId, listIds, repoPath}: {userId: string, listIds: Array<string>, repoPath: string}) => {
+const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {userId: string, listIds: Array<string>, repoPath: string, onStop: () => void}) => {
   return async (filePath: string) => {
-    console.log('DEBUG file change', filePath, TodoParser.isFileSupported(filePath));
     if (!TodoParser.isFileSupported(filePath)) {
       // File not supported
       return;
@@ -69,11 +79,31 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath}: {userId: 
     todosInFlight.push(...newTodos);
     newTodos.forEach(async (todo) => {
       // Create task
-      const newTask = await sharedClient.task.create({name: todo.name, listIds, assigneesIds: [userId]});
-      logger.info(`Create task with name '${todo.name}'`);
+      let newTask: {index: number, name: string} | undefined = undefined;
+      try {
+        logger.info(`Create task with name '${todo.name}'`);
+        newTask = await sharedClient.task.create({name: todo.name, listIds, assigneesIds: [userId]});
+      } catch (e) {
+        output(`Task '${todo.name}' could not be created.`);
+
+        if (e instanceof ClientError) {
+          // Stop watch if we are not logged in
+          if (e.code === ClientErrorCode.CredentialsInvalid) {
+            output(`You credentials are invalid and were probably revoked. Please restart watch to login again.`);
+            onStop();
+          } else if (e.code === ClientErrorCode.CredentialsMissing) {
+            output(`You credentials are missing. Please restart watch to login again.`);
+            onStop();
+          }
+        }
+
+        // Ignore other errors. We don't want this to crash watch
+        logger.error(`Could not create task with name '${todo.name}'`);
+      }
 
       if (newTask) {
         // Update line of file with task index and todo description
+        output(`T-${newTask.index}: '${newTask.name}' has been created.`);
         await file.updateLine({
           lineIndex: todo.file.line.index,
           previousContent: todo.file.line.text,
@@ -89,56 +119,152 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath}: {userId: 
   }
 };
 
-const handler = async () => {
-  const configValues = await config.getAll();
-  const credentials = await keychain.getCredentials();
-  const user = configValues.user;
-  if (!credentials || !user) {
-    output('You need to be logged in to use `watch`. Please authenticate with the `auth login` command.');
-    return;
-  }
 
-  // Find all repositories to watch
-  let repositories = configValues.repositories;
-  if (!repositories?.length) {
-    // If there's none, request a repo
-    await addRepo();
-  }
-
-  repositories = await config.get('repositories');
-  if (!repositories?.length) {
-    throw new Error('Missing repository');
-  }
-
-  // Get default listIds
-  let defaultListIds = configValues.defaultListIds;
-  if (!defaultListIds?.length) {
-    const {preferences} = await sharedClient.userPreference.get();
-    defaultListIds = preferences.defaultListIds;
-    await config.set('defaultListIds', defaultListIds);
-  }
-
-  if (!defaultListIds?.length) {
-    throw new Error('Default list is missing. Please go to Height > Settings > Preferences and set a default list for new tasks');
-  }
-
+export const watch = ({repositories, userId, listIds}: {repositories: Array<{path: string}>, userId: string, listIds: Array<string>}) => {
   // Log how many repositories we're watching
   logger.info(`Started watching ${repositories.length} repositories`);
-  output(`Watching ${repositories.length} repositories…`);
 
   // Watch each repository
   repositories.forEach(({path}) => {
+    let watcherPromise: ReturnType<GitRepo['watch']>;
     const handler = createHandleRepositoryFileChange({
-      userId: user.id,
-      listIds: defaultListIds ?? [],
+      userId,
+      listIds,
       repoPath: path,
+      onStop: async () => {
+        const watcher = await watcherPromise;
+        watcher.close();
+      }
     })
-    new GitRepo({path}).watch(handler);
+    
+    watcherPromise = new GitRepo({path}).watch(handler);
   });
+}
+
+export const restartWatchIfRunning = async () => {
+  if (!Service.isSupported()) {
+    return;
+  }
+
+  const service = new Service(ServiceType.Watch);
+  if (!await service.isStarted()) {
+    return;
+  }
+
+  await service.restart();
+}
+
+const handler: Command['handler'] = async (args) => {
+  const service = new Service(ServiceType.Watch);
+  if (await service.isStarted()) {
+    output('Watch is already running in the background. Use `watch stop` or `watch restart` to stop or restart it.');
+    return;
+  }
+
+  // Ask for repo if needed
+  let repositories = await config.get('repositories');
+  if (!repositories?.length) {
+    await addRepo.handler({_: ['repos', 'add'], $0: SCRIPT_NAME});
+    repositories = await config.get('repositories');
+  }
+
+  if (!repositories?.length) {
+    throw new Error('Missing repository. They should have been configured by now.');
+  }
+  
+  // Authenticate if needed
+  let credentials = await keychain.getCredentials();
+  if (!credentials) {
+    const shouldLogin = (await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirm',
+      message: 'Sign up or log in on Height.app to track your todos',
+      default: true,
+    })).confirm as boolean;
+
+    if (!shouldLogin) {
+      return;
+    }
+
+    await login.handler({_: ['auth', 'login'], $0: SCRIPT_NAME});
+    credentials = await keychain.getCredentials();
+  }
+
+  if (!credentials) {
+    throw new Error('Missing credentials. User should have been logged in by now');
+  }
+
+  // Refresh default listIds
+  const defaultListIds = await getDefaultListIds(sharedClient);
+  await config.set('defaultListIds', defaultListIds);
+
+  // Check if we should run as a service
+  const runAsService = await (async () => {
+    if (!Service.isSupported()) {
+      return false;
+    }
+
+    if (args.service !== undefined) {
+      return args.service
+    }
+
+    return (await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirm',
+      message: 'Do you want to run watch in the background?',
+      default: true,
+    })).confirm as boolean;
+  })();
+ 
+  if (runAsService) {
+    await service.start({onPassword: async () => {
+      return (await inquirer.prompt({
+        type: 'password',
+        name: 'password',
+        message: 'You password is required to run watch in the background',
+      })).password;
+    }});
+    
+    output(`Watch is now running in the background and watching ${repositories.length} ${repositories.length > 1 ? 'repositories…' : 'repository…'}`);
+  } else {
+    output(`Watching ${repositories.length} ${repositories.length > 1 ? 'repositories' : 'repository'}…`);
+    watch({repositories, userId: credentials.user.id, listIds: defaultListIds});
+  }
 };
 
-export default {
+const command: Command = {
   command: 'watch',
-  describe: 'Watch Git repositories and automatically create tasks for todos',
+  describe: 'Turn // todo into tasks automatically',
+  builder: (argv) => {
+    if (Service.isSupported()) {
+      return argv.command('stop', 'Stop watch from running as a service', {}, async () => {
+        const service = new Service(ServiceType.Watch);
+        if (!await service.isStarted()) {
+          output('Watch is not running.');
+          return;
+        }
+  
+        await service.stop();
+        output('Watch has been stopped.');
+      })
+      .command('restart', 'Restart watch service', {}, async () => {
+        const service = new Service(ServiceType.Watch);
+        if (!await service.isStarted()) {
+          output('Watch is not running.');
+          return;
+        }
+  
+        await service.restart();
+        output('Watch has been restarted.');
+      }).options('service', {
+        boolean: true,
+        description: 'Run watch in the background',
+      })
+    }
+
+    return argv;
+  },
   handler,
 };
+
+export default command;

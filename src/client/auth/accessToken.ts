@@ -124,7 +124,7 @@ const revoke = async ({refreshToken}: {refreshToken: string}) => {
     },
   });
 
-  if (response.status < 200 || response.status >= 300) {
+  if ((response.status < 200 || response.status >= 300) && response.status !== 404) {
     throw new ClientError({
       status: response.status,
       url: url.href,

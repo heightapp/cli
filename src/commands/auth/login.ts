@@ -5,15 +5,17 @@ import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
 import sharedClient from 'helpers/sharedClient';
 import output from 'helpers/output';
 import Client from 'client';
-import config from 'helpers/config';
 import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
+import { CommandModule } from 'yargs';
+
+type Command = CommandModule<object, object>
 
 const GET_AUTHORIZATION_CODE_INTERVAL = 3000;
 
 // Try to get auth code every `GET_AUTHORIZATION_CODE_INTERVAL` interval
 const getAuthorizationCode = (readKey: string) => {
-  return new Promise<string>((resolve) => {
+  return new Promise<string>((resolve, reject) => {
     setTimeout(async () => {
       try {
         const {code} = await sharedClient.auth.authorizationCode.get({readKey})
@@ -23,14 +25,14 @@ const getAuthorizationCode = (readKey: string) => {
           // Retry
           resolve(getAuthorizationCode(readKey));
         } else {
-          throw e
+          reject(e);
         }
       }
     }, GET_AUTHORIZATION_CODE_INTERVAL)
   })
 }
 
-const login = async () => {
+const handler: Command['handler'] = async () => {
   const existingCredentials = await keychain.getCredentials();
   if (existingCredentials) {
     logger.info('Tried to log in but already logged in');
@@ -60,7 +62,17 @@ const login = async () => {
   open(url.href);
 
   // Wait for the code to be available
-  const code = await getAuthorizationCode(readKey)
+  let code: string;
+  try {
+    code = await getAuthorizationCode(readKey)
+  } catch (e) {
+    if (e instanceof ClientError && e.status === 404) {
+      output('You seem to have denied access.', 'Please try again of contact support if you think this is an error.');
+      return;
+    }
+    
+    throw e;
+  }
 
   // Create tokens
   const credentials = await sharedClient.auth.accessToken.create({code, codeVerifier: code_verifier});
@@ -71,13 +83,17 @@ const login = async () => {
 
   // Save credentials and user in config
   logger.info('Save credentials and user');
-  await Promise.all([
-    keychain.setCredentials(credentials),
-    config.set('user', {id: user.id, email: user.email})
-  ])
+  await keychain.setCredentials({...credentials, user: {id: user.id, email: user.email}});
 
   logger.info(`User is logged in: ${user.email}`);
   output('You are logged in.');
 };
 
-export default login;
+const command: Command = {
+  command: 'login',
+  describe: 'Authenticate a user with Height',
+  handler,
+};
+
+export default command;
+

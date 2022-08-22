@@ -1,18 +1,19 @@
 {
   "name": "@heightapp/cli",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "",
   "type": "module",
   "engines": {
     "node": ">=16.0.0"
   },
   "bin": {
-    "height": "dist/index.js"
+    "height": "dist/cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./scripts/build.js",
-    "start": "npm run build && node dist/index.js",
+    "prepare": "NODE_ENV=production ./scripts/build.js",
+    "build": "NODE_ENV=production ./scripts/build.js",
+    "dev": "./scripts/build.js && node dist/cli.js",
+    "debug": "HEIGHT_DEBUG=true ./scripts/build.js && node dist/cli.js",
     "lint": "eslint ./src"
   },
   "repository": "git+https://github.com/heightapp/cli.git",
@@ -54,5 +55,9 @@
     "winston": "^3.8.1",
     "winston-daily-rotate-file": "^4.7.1",
     "yargs": "^17.5.1"
+  },
+  "optionalDependencies": {
+    "node-mac": "^1.0.1",
+    "node-windows": "^1.0.0-beta.8"
   }
 }
