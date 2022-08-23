@@ -1,7 +1,10 @@
 import config from 'helpers/config';
 import output from 'helpers/output';
+import {CommandModule} from 'yargs';
 
-const list = async () => {
+type Command = CommandModule<object, object>
+
+const handler: Command['handler'] = async () => {
   // Get repositories from config
   const repositories = await config.get('repositories');
   if (!repositories?.length) {
@@ -14,4 +17,10 @@ const list = async () => {
   output(repositories.map((repo) => `- ${repo.path}`).join('\n'));
 };
 
-export default list;
+const command: Command = {
+  command: 'list',
+  describe: 'List tracked repositories',
+  handler,
+};
+
+export default command;

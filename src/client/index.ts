@@ -1,11 +1,13 @@
 import auth from 'client/auth';
-import user from 'client/user';
-import ClientError, { ClientErrorCode } from 'client/helpers/clientError';
-import env from 'env';
-import userPreference from 'client/userPreference';
+import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
 import task from 'client/task';
-import request from 'helpers/request';
+import user from 'client/user';
+import userPreference from 'client/userPreference';
+import view from 'client/view';
+import env from 'env';
 import logger from 'helpers/logger';
+import request from 'helpers/request';
+import {Response} from 'node-fetch';
 
 const EXPIRY_OFFSET = 2 * 60 * 1000; // 2 mins - to account for any request/other delay and be safe
 
@@ -15,11 +17,11 @@ type ClientCredentials = {
   expiresAt: number;
 }
 class Client {
-  private _credentials: ClientCredentials | null;
-  private onUpdatedCredentials?: (credentials: ClientCredentials | null) => void
+  private privateCredentials: ClientCredentials | null;
+  private onUpdatedCredentials?: (credentials: ClientCredentials | null) => void;
 
   private get credentials() {
-    return this._credentials
+    return this.privateCredentials;
   }
 
   private set credentials(credentials: ClientCredentials | null) {
@@ -27,8 +29,8 @@ class Client {
       loggedIn: !!credentials,
     });
 
-    this._credentials = credentials;
-    this.onUpdatedCredentials?.(this._credentials);
+    this.privateCredentials = credentials;
+    this.onUpdatedCredentials?.(this.privateCredentials);
   }
 
   get auth() {
@@ -58,42 +60,48 @@ class Client {
           this.credentials = null;
         },
       },
-    }
+    };
   }
 
   get user() {
     return {
       get: user.get(this),
-    }
+    };
   }
 
   get userPreference() {
     return {
       get: userPreference.get(this),
-    }
+    };
   }
 
   get task() {
     return {
       create: task.create(this),
-    }
+    };
+  }
+
+  get view() {
+    return {
+      getDefault: view.getDefault(this),
+    };
   }
 
   constructor(credentials: ClientCredentials | null, onUpdatedCredentials?: (credentials: ClientCredentials | null) => void) {
-    this._credentials = credentials;
+    this.privateCredentials = credentials;
     this.onUpdatedCredentials = onUpdatedCredentials;
   }
 
-  request = async <Data extends object>(path: string, options?: Parameters<typeof request>[1]) => {
+  request = async <Data extends object>(path: string, options?: Parameters<typeof request>[1]): Promise<{response: Response, data: Data}> => {
     // If token is expired, refresh
     if (this.credentials && this.credentials.expiresAt < Date.now() + EXPIRY_OFFSET) {
       await this.auth.accessToken.refresh();
     }
 
     const url = (() => {
-      const url = new URL(env.apiHost);
-      url.pathname = path;
-      return url.href;
+      const u = new URL(env.apiHost);
+      u.pathname = path;
+      return u.href;
     })();
 
     if (!this.credentials) {
@@ -107,16 +115,23 @@ class Client {
       },
     });
 
-    if (response.status === 401) {
-      this.credentials = null;
-      throw new ClientError({message: 'Invalid credentials. Please reauthenticated.', code: ClientErrorCode.CredentialsInvalid, url});
-    }
-
-    let data: any = undefined;
+    let data: any;
     try {
       data = await response.json();
     } catch (e) {
       // Ignore for now, we'll handle it later
+    }
+
+    if (response.status === 401) {
+      if (data?.error?.type === 'authtokenexpired') {
+        // Refresh token
+        await this.auth.accessToken.refresh();
+        return this.request<Data>(path, options);
+      }
+
+      // Clear credentials
+      this.credentials = null;
+      throw new ClientError({message: 'Invalid credentials. Please reauthenticate.', code: ClientErrorCode.CredentialsInvalid, url});
     }
 
     if (response.status >= 200 && response.status < 300) {
@@ -131,7 +146,7 @@ class Client {
     }
 
     throw new ClientError({message: data?.error?.message ?? 'Something weird happened. Please try again.', status: response.status, url});
-  }
+  };
 }
 
 export default Client;

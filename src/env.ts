@@ -1,15 +1,20 @@
 import dotenv from 'dotenv';
+
 import path from 'path';
+import {fileURLToPath} from 'url';
 
-dotenv.config({path: path.resolve('.env')});
+// Load env from file
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
+dotenv.config({path: path.resolve(dirname, '../.env')});
 
-const defaultApiHost = 'api.height.app';
+const defaultApiHost = 'https://api.height.app';
 const apiHost = process.env.HEIGHT_API_HOST || defaultApiHost;
 
 const env = {
-  prod: apiHost === defaultApiHost,
+  nodeEnv: process.env.NODE_ENV === 'production' ? 'production' as const : 'development' as const,
   apiHost,
-  webHost: process.env.HEIGHT_WEB_HOST || 'height.app',
+  webHost: process.env.HEIGHT_WEB_HOST || 'https://height.app',
   oauthRedirectUrl: (() => {
     const url = new URL(apiHost);
     url.pathname = 'oauth/authorizationCode';
@@ -17,6 +22,7 @@ const env = {
   })(),
   oauthScopes: ['api'],
   oauthClientId: process.env.HEIGHT_OAUTH_CLIENT_ID || 'aL9IGyJYm4ygMy0k8Sug8mAiYE4SaewGyasS2EcsCkm',
-}
+  debug: process.env.HEIGHT_DEBUG || false,
+};
 
 export default env;

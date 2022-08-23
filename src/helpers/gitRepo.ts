@@ -1,13 +1,14 @@
-import fs from 'fs';
-import path from 'path';
 import {compile as gitIgnoreParserCompile} from 'gitignore-parser';
 import watch from 'node-watch';
 
-class GitRepo {
-  private path: string
+import fs from 'fs';
+import path from 'path';
 
-  constructor({path}: {path: string}) {
-    this.path = path;
+class GitRepo {
+  private path: string;
+
+  constructor(options: {path: string}) {
+    this.path = options.path;
   }
 
   private async parseGitIgnore() {
@@ -25,7 +26,7 @@ class GitRepo {
 
   async watch(onChange: (filePath: string) => void) {
     const gitIgnore = await this.parseGitIgnore();
-    watch(this.path, {
+    return watch(this.path, {
       recursive: true,
     }, (eventType, filePath) => {
       if (eventType === 'update') {
@@ -40,4 +41,4 @@ class GitRepo {
   }
 }
 
-export default GitRepo
+export default GitRepo;
