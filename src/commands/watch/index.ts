@@ -1,4 +1,5 @@
-import ClientError, {ClientErrorCode} from 'client/helpers/clientError';
+import {ClientError, ClientErrorCode} from '@heightapp/client';
+import createClient from 'clientHelpers/createClient';
 import getDefaultListIds from 'clientHelpers/getDefaultListIds';
 import login from 'commands/auth/login';
 import addRepo from 'commands/repos/add';
@@ -11,7 +12,6 @@ import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
 import output from 'helpers/output';
 import Service, {ServiceType} from 'helpers/service';
-import sharedClient from 'helpers/sharedClient';
 import inquirer from 'inquirer';
 import {CommandModule} from 'yargs';
 
@@ -40,7 +40,7 @@ const isTodoEqual = (task1: Todo, task2: Todo): boolean => {
   return task1.name === task2.name || (task1.file.path === task2.file.path && task1.file.line.index === task2.file.line.index);
 };
 
-const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {userId: string, listIds: Array<string>, repoPath: string, onStop: () => void}) => {
+const createHandleRepositoryFileChange = ({userId, listIds, repoPath, client, onStop}: {userId: string, listIds: Array<string>, repoPath: string, client: Client, onStop: () => void}) => {
   return async (filePath: string) => {
     if (!TodoParser.isFileSupported(filePath)) {
       // File not supported
@@ -84,7 +84,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
       let newTask: {index: number, name: string} | undefined;
       try {
         logger.info(`Create task with name '${todo.name}'`);
-        newTask = await sharedClient.task.create({name: todo.name, listIds, assigneesIds: [userId]});
+        newTask = await client.task.create({name: todo.name, listIds, assigneesIds: [userId]});
       } catch (e) {
         output(`Task '${todo.name}' could not be created.`);
 
@@ -92,9 +92,6 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
           // Stop watch if we are not logged in
           if (e.code === ClientErrorCode.CredentialsInvalid) {
             output('You credentials are invalid and were probably revoked. Please restart watch to login again.');
-            onStop();
-          } else if (e.code === ClientErrorCode.CredentialsMissing) {
-            output('You credentials are missing. Please restart watch to login again.');
             onStop();
           }
         }
@@ -121,7 +118,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, onStop}: {
   };
 };
 
-export const watch = ({repositories, userId, listIds}: {repositories: Array<{path: string}>, userId: string, listIds: Array<string>}) => {
+export const watch = ({repositories, userId, listIds, client}: {repositories: Array<{path: string}>, userId: string, listIds: Array<string>, client: Client}) => {
   // Log how many repositories we're watching
   logger.info(`Started watching ${repositories.length} repositories`);
 
@@ -132,6 +129,7 @@ export const watch = ({repositories, userId, listIds}: {repositories: Array<{pat
       userId,
       listIds,
       repoPath: path,
+      client,
       onStop: async () => {
         const watcher = await watcherPromise;
         watcher.close();
@@ -196,7 +194,8 @@ const handler: Command['handler'] = async (args) => {
   }
 
   // Refresh default listIds
-  const defaultListIds = await getDefaultListIds(sharedClient);
+  const client = createClient(credentials.refreshToken);
+  const defaultListIds = await getDefaultListIds(client);
   await config.set('defaultListIds', defaultListIds);
 
   // Check if we should run as a service
@@ -229,7 +228,7 @@ const handler: Command['handler'] = async (args) => {
     output(`Watch is now running in the background and watching ${repositories.length} ${repositories.length > 1 ? 'repositories…' : 'repository…'}`);
   } else {
     output(`Watching ${repositories.length} ${repositories.length > 1 ? 'repositories' : 'repository'}…`);
-    watch({repositories, userId: credentials.user.id, listIds: defaultListIds});
+    watch({repositories, userId: credentials.user.id, listIds: defaultListIds, client});
   }
 };
 

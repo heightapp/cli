@@ -4,14 +4,12 @@ import keytar from 'keytar';
 import logger from './logger';
 
 type Credentials = {
-  accessToken: string;
   refreshToken: string;
-  expiresAt: number;
   user: {
-    id: string,
-    email: string,
-  }
-}
+    id: string;
+    email: string;
+  };
+};
 
 const ACCOUNT = 'height';
 const SERVICE = env.nodeEnv === 'production' ? 'height-cli' : 'height-cli-dev';
@@ -25,11 +23,7 @@ const getCredentials = async () => {
   }
 
   try {
-    const credentials = JSON.parse(json);
-    if (typeof credentials.accessToken !== 'string' || typeof credentials.refreshToken !== 'string' || typeof credentials.expiresAt !== 'number') {
-      return null;
-    }
-    return credentials as Credentials;
+    return JSON.parse(json) as Credentials;
   } catch {
     // Ignore
     return null;

@@ -1,4 +1,4 @@
-import Client from 'client';
+import Client from '@heightapp/client';
 
 const getDefaultListIds = async (client: Client) => {
   // Fetch user's default list
@@ -9,7 +9,7 @@ const getDefaultListIds = async (client: Client) => {
   }
 
   // Fetch workspace's default list
-  const workspaceDefaultList = await client.view.getDefault();
+  const workspaceDefaultList = await client.view.default.get();
   return [workspaceDefaultList.id];
 };
 

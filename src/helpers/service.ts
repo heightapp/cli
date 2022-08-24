@@ -9,12 +9,12 @@ import {fileURLToPath} from 'url';
 import switchImpossibleCase from './switchImpossibleCase';
 
 type PlatformService = EventEmitter & {
-  exists: boolean | (() => boolean),
-  start: () => void,
-  restart: () => void,
-  install: () => void,
-  uninstall: () => void,
-}
+  exists: boolean | (() => boolean);
+  start: () => void;
+  restart: () => void;
+  install: () => void;
+  uninstall: () => void;
+};
 
 export enum ServiceType {
   Watch = 'watch',

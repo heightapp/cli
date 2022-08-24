@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 import 'commonImports';
+import createClient from 'clientHelpers/createClient';
 import getDefaultListIds from 'clientHelpers/getDefaultListIds';
 import colors from 'colors/safe.js';
 import {watch} from 'commands/watch';
@@ -8,7 +9,6 @@ import config from 'helpers/config';
 import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
 import platform, {Platform} from 'helpers/platform';
-import sharedClient from 'helpers/sharedClient';
 import switchImpossibleCase from 'helpers/switchImpossibleCase';
 
 switch (platform) {
@@ -34,8 +34,10 @@ if (!credentials) {
   process.exit(1);
 }
 
+const client = createClient(credentials.refreshToken);
+
 // Refresh default listIds
-const defaultListIds = await getDefaultListIds(sharedClient);
+const defaultListIds = await getDefaultListIds(client);
 await config.set('defaultListIds', defaultListIds);
 
 // Verify we have repositories
@@ -45,4 +47,4 @@ if (!repositories?.length) {
   process.exit(1);
 }
 
-watch({repositories, userId: credentials.user.id, listIds: defaultListIds});
+watch({repositories, userId: credentials.user.id, listIds: defaultListIds, client});

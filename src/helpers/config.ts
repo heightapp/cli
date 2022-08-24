@@ -56,17 +56,10 @@ const get = async <K extends keyof Config>(key: K): Promise<Config[K] | undefine
   return (await getConfig())?.[key];
 };
 
-const set = async <K extends keyof Config>(key: K, value: Config[K]) => {
+const set = async <K extends keyof Config>(key: K, value: Exclude<Config[K], undefined>) => {
   logger.info(`Config - set: ${key}: ${stringify(value)}`);
   const config = await getConfig();
   const updatedConfig = {...config, [key]: value};
-  await saveConfig(updatedConfig);
-};
-
-const update = async (partialConfig: Partial<Config>) => {
-  logger.info(`Config - update: ${stringify(partialConfig)}`);
-  const config = await getConfig();
-  const updatedConfig = {...config, ...partialConfig};
   await saveConfig(updatedConfig);
 };
 
@@ -85,6 +78,5 @@ export default {
   getAll,
   get,
   set,
-  update,
   clear,
 };

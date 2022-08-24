@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import 'commonImports';
-import ClientError from 'client/helpers/clientError';
+import {ClientError} from '@heightapp/client';
 import auth from 'commands/auth';
 import help from 'commands/help';
 import logs from 'commands/logs';
