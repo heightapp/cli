@@ -6,13 +6,13 @@ import {fileURLToPath} from 'url';
 // Load env from file
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
-dotenv.config({path: path.resolve(dirname, '../.env')});
+dotenv.config({path: path.resolve(dirname, '../../.env')});
 
 const defaultApiHost = 'https://api.height.app';
 const apiHost = process.env.HEIGHT_API_HOST || defaultApiHost;
 
 const env = {
-  nodeEnv: process.env.NODE_ENV === 'production' ? 'production' as const : 'development' as const,
+  nodeEnv: process.env.NODE_ENV === 'production' ? ('production' as const) : ('development' as const),
   apiHost,
   webHost: process.env.HEIGHT_WEB_HOST || 'https://height.app',
   oauthRedirectUrl: (() => {

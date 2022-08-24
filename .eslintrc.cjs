@@ -3,17 +3,22 @@ module.exports = {
     node: true,
   },
   extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    'plugin:import/typescript'
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:import/typescript',
   ],
+  plugins: ['@typescript-eslint', 'import'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'es2021',
     project: './tsconfig.json',
   },
-  plugins: ['@typescript-eslint', "import"],
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+    },
+  ],
   rules: {
     'import/no-unresolved': 0,
     'import/first': 'error',
@@ -247,9 +252,6 @@ module.exports = {
     // http://eslint.org/docs/rules/no-label-var
     'no-label-var': 'error',
 
-    // disallow declaration of variables already declared in the outer scope
-    'no-shadow': 'error',
-
     // disallow use of undefined when initializing variables
     'no-undef-init': 'error',
 
@@ -292,15 +294,6 @@ module.exports = {
         imports: 'always-multiline',
         exports: 'always-multiline',
         functions: 'always-multiline',
-      },
-    ],
-
-    // enforce spacing before and after comma
-    'comma-spacing': [
-      'error',
-      {
-        before: false,
-        after: true,
       },
     ],
 
@@ -721,6 +714,7 @@ module.exports = {
     // plugin:@typescript-eslint/recommended
 
     '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
     '@typescript-eslint/no-unsafe-call': 'off',
@@ -802,5 +796,5 @@ module.exports = {
     // Enforces consistent spacing before and after commas.
     'comma-spacing': 'off',
     '@typescript-eslint/comma-spacing': ['error'],
-  }
+  },
 };

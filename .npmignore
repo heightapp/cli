@@ -1,9 +1,10 @@
+# Same as .gitignore but does not ignore the dist folder
+
 .idea/
 .DS_Store
 node_modules/
 npm-debug.log.*
 yarn-error.log
-dist/
 .env
 .vscode/*
 

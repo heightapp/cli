@@ -7,12 +7,12 @@
     "node": ">=16.0.0"
   },
   "bin": {
-    "height": "dist/cli.js"
+    "height": "dist/esm/cli.js"
   },
   "scripts": {
-    "build": "NODE_ENV=production ./scripts/build.js",
-    "dev": "./scripts/build.js && node dist/cli.js",
-    "debug": "HEIGHT_DEBUG=true ./scripts/build.js && node dist/cli.js",
+    "build": "NODE_ENV=production ./scripts/build.js --esm",
+    "dev": "NODE_ENV=development ./scripts/build.js --esm && node dist/esm/cli.js",
+    "debug": "HEIGHT_DEBUG=true npm run dev",
     "lint": "eslint ./src",
     "prepare": "npm run build"
   },

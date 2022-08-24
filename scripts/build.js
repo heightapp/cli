@@ -1,18 +1,30 @@
 #! /usr/bin/env node
 
+import {exec as execSync} from 'child_process';
 import esbuild from 'esbuild';
 import fs from 'fs';
-import glob from 'glob';
+import yargs from 'yargs/yargs';
+import {hideBin} from 'yargs/helpers';
+import util from 'util';
 import path from 'path';
 
-// WARNING: Do not use relative path with `./` or it doesn't work on Windows
-const SRC_DIR = 'src';
-const DIST_DIR = 'dist';
+const exec = util.promisify(execSync);
 
-const entryPoints = [
-  'src/cli.ts',
-  'src/watch.ts',
-];
+const args = yargs(hideBin(process.argv))
+  .option('esm', {
+    describe: 'Generate esm bundle',
+    type: 'boolean',
+  })
+  .option('cjs', {
+    describe: 'Generate cjs bundel',
+    type: 'boolean',
+  })
+  .option('types', {
+    describe: 'Generate types',
+    type: 'boolean',
+  }).argv;
+
+const entryPoints = ['src/cli.ts', 'src/watch.ts'];
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
 const external = Object.keys({
@@ -22,27 +34,14 @@ const external = Object.keys({
   ...(packageJson.optionalDependencies || {}),
 });
 
-const removeOutDir = async () => {
-  await fs.promises.rm(DIST_DIR, {recursive: true, force: true});
-}
+const cleanup = () => {
+  fs.rmSync('./dist', {recursive: true, force: true});
+};
 
-const moveEntryPoints = async () => {
-  const srcJsFiles = await new Promise((resolve) =>
-    glob(path.join(DIST_DIR, SRC_DIR, '**', '*.js'), (err, results) => {
-      resolve(results);
-    }),
-  );
-
-  srcJsFiles.forEach((jsPath) => {
-    const jsRelativePath = path.relative(path.join(DIST_DIR, SRC_DIR), jsPath);
-    const outputPath = path.join(DIST_DIR, jsRelativePath);
-    if (fs.existsSync(jsPath)) {
-      fs.mkdirSync(path.dirname(outputPath), {recursive: true});
-      fs.renameSync(jsPath, outputPath);
-    }
-  });
-
-  await fs.promises.rm(path.resolve(DIST_DIR, SRC_DIR), {recursive: true});
+const outDirFromConfig = (configPath) => {
+  const config = JSON.parse(fs.readFileSync(configPath, {encoding: 'utf-8'}));
+  const outDir = config.compilerOptions.outDir;
+  return path.resolve('./config', outDir);
 };
 
 // Define node env statically since we want this to be part of the build
@@ -52,29 +51,61 @@ const define = {
   'process.env.HEIGHT_DEBUG': `${process.env.HEIGHT_DEBUG ?? 'false'}`,
 };
 
-const compile = async () => {
+const build = async () => {
   // Remove the directory before building or moving files fails on Windows (does not override)
-  await removeOutDir();
+  cleanup();
 
   try {
-    await esbuild.build({
+    const config = {
       entryPoints,
       bundle: true,
-      outbase: './',
       external,
-      outdir: DIST_DIR,
       platform: 'node',
-      target: 'node16',
-      format: 'esm',
       treeShaking: true,
       define,
-    });
+    };
+
+    const promises = [];
+
+    // Build ESM
+    if (args.esm) {
+      const tsconfig = 'configs/tsconfig.esm.json';
+      const outdir = outDirFromConfig(tsconfig);
+      promises.push(
+        esbuild.build({
+          ...config,
+          outdir,
+          format: 'esm',
+          tsconfig,
+        }),
+      );
+    }
+
+    // Build CJS
+    if (args.cjs) {
+      const tsconfig = 'configs/tsconfig.cjs.json';
+      const outdir = outDirFromConfig(tsconfig);
+      promises.push(
+        esbuild.build({
+          ...config,
+          outdir,
+          format: 'cjs',
+          tsconfig,
+        }),
+      );
+    }
+
+    // Build types
+    if (args.types) {
+      const tsconfig = './configs/tsconfig.types.json';
+      promises.push(exec(`tsc --project ${tsconfig} && tsc-alias --project ${tsconfig}`));
+    }
+
+    await Promise.all(promises);
   } catch (e) {
     console.error(e.message);
     process.exit(1);
   }
-
-  await moveEntryPoints();
 };
 
-compile();
+build();

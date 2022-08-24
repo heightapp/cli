@@ -51,7 +51,7 @@ class Service {
       case ServiceType.Watch: {
         this.name = 'app.height.cli.watch';
         this.description = 'Watch files and creates Height tasks for todos.';
-        this.script = path.resolve(root, 'dist/watch.js');
+        this.script = path.resolve(root, './esm/watch.js');
         return;
       }
       default: {
