@@ -11,7 +11,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'import'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 'es2021',
+    ecmaVersion: 'es2022',
     project: './tsconfig.json',
   },
   overrides: [
