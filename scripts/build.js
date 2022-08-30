@@ -48,7 +48,6 @@ const outDirFromConfig = (configPath) => {
 // and not depend on the user's environment.
 const define = {
   'process.env.NODE_ENV': `"${process.env.NODE_ENV ?? 'development'}"`,
-  'process.env.HEIGHT_DEBUG': `${process.env.HEIGHT_DEBUG ?? 'false'}`,
 };
 
 const build = async () => {
