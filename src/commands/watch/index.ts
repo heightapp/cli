@@ -15,9 +15,12 @@ import Service, {ServiceType} from 'helpers/service';
 import inquirer from 'inquirer';
 import {CommandModule} from 'yargs';
 
-type Command = CommandModule<object, {
-  service?: boolean
-}>;
+type Command = CommandModule<
+  object,
+  {
+    service?: boolean;
+  }
+>;
 
 type FileLine = {
   text: string;
@@ -40,7 +43,19 @@ const isTodoEqual = (task1: Todo, task2: Todo): boolean => {
   return task1.name === task2.name || (task1.file.path === task2.file.path && task1.file.line.index === task2.file.line.index);
 };
 
-const createHandleRepositoryFileChange = ({userId, listIds, repoPath, client, onStop}: {userId: string, listIds: Array<string>, repoPath: string, client: Client, onStop: () => void}) => {
+const createHandleRepositoryFileChange = ({
+  userId,
+  listIds,
+  repoPath,
+  client,
+  onStop,
+}: {
+  userId: string;
+  listIds: Array<string>;
+  repoPath: string;
+  client: Client;
+  onStop: () => void;
+}) => {
   return async (filePath: string) => {
     if (!TodoParser.isFileSupported(filePath)) {
       // File not supported
@@ -81,7 +96,7 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, client, on
     todosInFlight.push(...newTodos);
     newTodos.forEach(async (todo) => {
       // Create task
-      let newTask: {index: number, name: string} | undefined;
+      let newTask: {index: number; name: string} | undefined;
       try {
         logger.info(`Create task with name '${todo.name}'`);
         newTask = await client.task.create({name: todo.name, listIds, assigneesIds: [userId]});
@@ -118,7 +133,17 @@ const createHandleRepositoryFileChange = ({userId, listIds, repoPath, client, on
   };
 };
 
-export const watch = ({repositories, userId, listIds, client}: {repositories: Array<{path: string}>, userId: string, listIds: Array<string>, client: Client}) => {
+export const watch = ({
+  repositories,
+  userId,
+  listIds,
+  client,
+}: {
+  repositories: Array<{path: string}>;
+  userId: string;
+  listIds: Array<string>;
+  client: Client;
+}) => {
   // Log how many repositories we're watching
   logger.info(`Started watching ${repositories.length} repositories`);
 
@@ -146,7 +171,7 @@ export const restartWatchIfRunning = async () => {
   }
 
   const service = new Service(ServiceType.Watch);
-  if (!await service.isStarted()) {
+  if (!(await service.isStarted())) {
     return;
   }
 
@@ -174,12 +199,14 @@ const handler: Command['handler'] = async (args) => {
   // Authenticate if needed
   let credentials = await keychain.getCredentials();
   if (!credentials) {
-    const shouldLogin = (await inquirer.prompt({
-      type: 'confirm',
-      name: 'confirm',
-      message: 'Sign up or log in on Height.app to track your todos',
-      default: true,
-    })).confirm as boolean;
+    const shouldLogin = (
+      await inquirer.prompt({
+        type: 'confirm',
+        name: 'confirm',
+        message: 'Sign up or log in on Height.app to track your todos',
+        default: true,
+      })
+    ).confirm as boolean;
 
     if (!shouldLogin) {
       return;
@@ -208,23 +235,18 @@ const handler: Command['handler'] = async (args) => {
       return args.service;
     }
 
-    return (await inquirer.prompt({
-      type: 'confirm',
-      name: 'confirm',
-      message: 'Do you want to run watch in the background?',
-      default: true,
-    })).confirm as boolean;
+    return (
+      await inquirer.prompt({
+        type: 'confirm',
+        name: 'confirm',
+        message: 'Do you want to run watch in the background?',
+        default: true,
+      })
+    ).confirm as boolean;
   })();
 
   if (runAsService) {
-    await service.start({onPassword: async () => {
-      return (await inquirer.prompt({
-        type: 'password',
-        name: 'password',
-        message: 'You password is required to run watch in the background',
-      })).password;
-    }});
-
+    await service.start();
     output(`Watch is now running in the background and watching ${repositories.length} ${repositories.length > 1 ? 'repositories…' : 'repository…'}`);
   } else {
     output(`Watching ${repositories.length} ${repositories.length > 1 ? 'repositories' : 'repository'}…`);
@@ -237,29 +259,31 @@ const command: Command = {
   describe: 'Turn // todo into tasks automatically',
   builder: (argv) => {
     if (Service.isSupported()) {
-      return argv.command('stop', 'Stop watch from running as a service', {}, async () => {
-        const service = new Service(ServiceType.Watch);
-        if (!await service.isStarted()) {
-          output('Watch is not running.');
-          return;
-        }
+      return argv
+        .command('stop', 'Stop watch from running as a service', {}, async () => {
+          const service = new Service(ServiceType.Watch);
+          if (!(await service.isStarted())) {
+            output('Watch is not running.');
+            return;
+          }
 
-        await service.stop();
-        output('Watch has been stopped.');
-      })
-      .command('restart', 'Restart watch service', {}, async () => {
-        const service = new Service(ServiceType.Watch);
-        if (!await service.isStarted()) {
-          output('Watch is not running.');
-          return;
-        }
+          await service.stop();
+          output('Watch has been stopped.');
+        })
+        .command('restart', 'Restart watch service', {}, async () => {
+          const service = new Service(ServiceType.Watch);
+          if (!(await service.isStarted())) {
+            output('Watch is not running.');
+            return;
+          }
 
-        await service.restart();
-        output('Watch has been restarted.');
-      }).options('service', {
-        boolean: true,
-        description: 'Run watch in the background',
-      });
+          await service.restart();
+          output('Watch has been restarted.');
+        })
+        .options('service', {
+          boolean: true,
+          description: 'Run watch in the background',
+        });
     }
 
     return argv;

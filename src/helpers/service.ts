@@ -2,7 +2,6 @@ import logger from 'helpers/logger';
 import platform, {Platform} from 'helpers/platform';
 
 import EventEmitter from 'events';
-import os from 'os';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
@@ -24,8 +23,8 @@ class Service {
   static isSupported() {
     switch (platform) {
       case Platform.Mac:
-      case Platform.Windows:
         return true;
+      case Platform.Windows:
       case Platform.Linux:
       case Platform.Other:
         return false;
@@ -77,14 +76,7 @@ class Service {
           logOnAsUser: true,
         });
       }
-      case Platform.Windows: {
-        const {Service: NodeService} = await import('node-windows');
-        return new NodeService({
-          name: this.name,
-          description: this.description,
-          script: this.script,
-        });
-      }
+      case Platform.Windows:
       case Platform.Linux:
       case Platform.Other: {
         return null;
@@ -109,17 +101,10 @@ class Service {
     return service.exists;
   }
 
-  async start({onPassword}: {onPassword: () => Promise<string>}) {
+  async start() {
     const service = await this.createService();
     if (!service) {
       throw new Error('Services are not supported on this platform');
-    }
-
-    if (platform === Platform.Windows) {
-      // On Windows, require password to start the service with the user and access the credentials vault and files
-      const password = await onPassword();
-      (service as any).logOnAs.account = os.userInfo().username;
-      (service as any).logOnAs.password = password;
     }
 
     return new Promise<void>((resolve, reject) => {
