@@ -18,6 +18,8 @@ const handler: Command['handler'] = async () => {
   // Revoke the credentials and clear them
   try {
     await createClient(existingCredentials.refreshToken).auth.revoke(existingCredentials.refreshToken);
+  } catch (e) {
+    logger.error(e);
   } finally {
     await Promise.all([keychain.clearCredentials(), config.clear('defaultListIds')]);
   }
