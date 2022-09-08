@@ -1,6 +1,7 @@
 import {parseGitIgnore} from '@heightapp/update-todos';
 import watch from 'node-watch';
 
+import fs from 'fs';
 import path from 'path';
 
 class GitRepo {
@@ -12,6 +13,10 @@ class GitRepo {
 
   async watch(onChange: (filePath: string) => void) {
     const gitIgnore = await parseGitIgnore(this.path);
+    if (!fs.existsSync(this.path)) {
+      return null;
+    }
+
     return watch(
       this.path,
       {

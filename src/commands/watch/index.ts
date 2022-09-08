@@ -86,7 +86,7 @@ export const watch = ({
       client,
       onStop: async () => {
         const watcher = await watcherPromise;
-        watcher.close();
+        watcher?.close();
       },
     });
 
