@@ -1,12 +1,11 @@
-import {ClientError, ClientErrorCode} from '@heightapp/client';
+import Client, {ClientError, ClientErrorCode} from '@heightapp/client';
+import updateTodos from '@heightapp/update-todos';
 import createClient from 'clientHelpers/createClient';
 import getDefaultListIds from 'clientHelpers/getDefaultListIds';
 import login from 'commands/auth/login';
 import addRepo from 'commands/repos/add';
-import TodoParser from 'commands/watch/helpers/todoParser';
 import config from 'helpers/config';
 import {SCRIPT_NAME} from 'helpers/constants';
-import GitFile from 'helpers/gitFile';
 import GitRepo from 'helpers/gitRepo';
 import keychain from 'helpers/keychain';
 import logger from 'helpers/logger';
@@ -22,27 +21,6 @@ type Command = CommandModule<
   }
 >;
 
-type FileLine = {
-  text: string;
-  index: number;
-};
-
-type Todo = {
-  name: string;
-  file: {
-    path: string;
-    line: FileLine;
-    prefix: string;
-    suffix?: string;
-  };
-};
-
-let todosInFlight: Array<Todo> = [];
-
-const isTodoEqual = (task1: Todo, task2: Todo): boolean => {
-  return task1.name === task2.name || (task1.file.path === task2.file.path && task1.file.line.index === task2.file.line.index);
-};
-
 const createHandleRepositoryFileChange = ({
   userId,
   listIds,
@@ -57,78 +35,29 @@ const createHandleRepositoryFileChange = ({
   onStop: () => void;
 }) => {
   return async (filePath: string) => {
-    if (!TodoParser.isFileSupported(filePath)) {
-      // File not supported
-      return;
-    }
+    await updateTodos({
+      filePath,
+      repoPath,
+      onCreateTask: async (name) => {
+        try {
+          logger.info(`Create task with name '${name}'`);
+          const newTask = await client.task.create({name, listIds, assigneesIds: [userId]});
+          logger.info(`Successfully created task with name '${name}' and index '${newTask.index}'.`);
+          return newTask;
+        } catch (e) {
+          logger.error(`Could not create task with name '${name}'`);
 
-    // Find all lines that changed
-    const parser = new TodoParser({filePath});
-    const file = new GitFile({filePath, repoPath});
-    const todos: Array<Todo> = [];
-    await file.changedLines((line) => {
-      const todo = parser.parse(line.text);
-      if (todo) {
-        todos.push({
-          name: todo.name,
-          file: {
-            path: filePath,
-            line,
-            prefix: todo.prefix,
-            suffix: todo.suffix,
-          },
-        });
-      }
-    });
-
-    // Filter out todos for which we are already creating a task
-    const newTodos = todos.filter((todo) => {
-      return !todosInFlight.find((todoInFlight) => {
-        return isTodoEqual(todoInFlight, todo);
-      });
-    });
-
-    if (!newTodos.length) {
-      return;
-    }
-
-    // Create task for each todo
-    todosInFlight.push(...newTodos);
-    newTodos.forEach(async (todo) => {
-      // Create task
-      let newTask: {index: number; name: string} | undefined;
-      try {
-        logger.info(`Create task with name '${todo.name}'`);
-        newTask = await client.task.create({name: todo.name, listIds, assigneesIds: [userId]});
-      } catch (e) {
-        output(`Task '${todo.name}' could not be created.`);
-
-        if (e instanceof ClientError) {
-          // Stop watch if we are not logged in
-          if (e.code === ClientErrorCode.CredentialsInvalid) {
-            output('You credentials are invalid and were probably revoked. Please restart watch to login again.');
-            onStop();
+          if (e instanceof ClientError) {
+            if (e.code === ClientErrorCode.RefreshTokenInvalid) {
+              output('You credentials are invalid and were probably revoked. Please restart watch to login again.');
+              onStop();
+            }
           }
+
+          // Ignore other errors. We don't want this to crash watch
+          return null;
         }
-
-        // Ignore other errors. We don't want this to crash watch
-        logger.error(`Could not create task with name '${todo.name}'`);
-      }
-
-      if (newTask) {
-        // Update line of file with task index and todo description
-        output(`T-${newTask.index}: '${newTask.name}' has been created.`);
-        await file.updateLine({
-          lineIndex: todo.file.line.index,
-          previousContent: todo.file.line.text,
-          newContent: `${todo.file.prefix}T-${newTask.index} ${newTask.name}${todo.file.suffix ? ` ${todo.file.suffix}` : ''}`,
-        });
-      }
-
-      // Clear todo from in-flight list
-      todosInFlight = todosInFlight.filter((todoInFlight) => {
-        return !isTodoEqual(todoInFlight, todo);
-      });
+      },
     });
   };
 };
