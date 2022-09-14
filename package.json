@@ -33,8 +33,8 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@heightapp/client": "^1.0.1",
-    "@heightapp/update-todos": "^1.0.0",
+    "@heightapp/client": "1.0.2",
+    "@heightapp/update-todos": "1.0.4",
     "@types/colors": "^1.2.1",
     "@types/git-diff-parser": "^1.0.1",
     "@types/inquirer": "^8.2.1",
