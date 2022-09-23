@@ -38,7 +38,7 @@
 
 "@heightapp/client@1.0.2":
   version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@heightapp/client/-/client-1.0.2.tgz#6bebf01cff62f6f1246d8b7a8c83431392b9035d"
+  resolved "https://registry.npmjs.org/@heightapp/client/-/client-1.0.2.tgz"
   integrity sha512-DDxu0zAUrC0u0EGsYw8DERFiA658A4b7+QaWViKOAw64LYwZrQ8jx+SHVMQ4FKA4dhRbAwUy9V6v5FRzdPxR0w==
   dependencies:
     "@types/node" "^18.7.11"
@@ -52,10 +52,10 @@
   dependencies:
     lodash "^4.17.11"
 
-"@heightapp/update-todos@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@heightapp/update-todos/-/update-todos-1.1.1.tgz#adc5eace2e2bd135cacfbd5e4fe85e47888b1f40"
-  integrity sha512-Q2KTGVTW1EZ2sleASOtA5gE2KPdxb/JT2WEYX8WvxlO1UP9njchgmqTmviFiB5Vn3FCE1fRrtwFF9cCFhHFwKg==
+"@heightapp/update-todos@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@heightapp/update-todos/-/update-todos-1.1.2.tgz#244d7e2689303a3a01f39c19a1a1f4c8acefbf65"
+  integrity sha512-8TpZs9/OdwRNidcLHHxCgxh/VUui49PjqdFm1W5u4HH+9ubeD6M9qgzUSiZnoJQWG/VQ0eLlDYXhR74eFbGqAg==
   dependencies:
     "@heightapp/comment-patterns" "0.13.0"
     "@types/git-diff-parser" "^1.0.1"
@@ -150,7 +150,7 @@
 
 "@types/node@^18.7.11":
   version "18.7.18"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.18.tgz#633184f55c322e4fb08612307c274ee6d5ed3154"
+  resolved "https://registry.npmjs.org/@types/node/-/node-18.7.18.tgz"
   integrity sha512-m+6nTEOadJZuTPkKR/SYK3A2d7FZrgElol9UP1Kae90VVU4a6mxnPuLiIW1m4Cq4gZ/nWb9GrdVXJCoCazDAbg==
 
 "@types/through@*":
@@ -554,7 +554,7 @@ d@1, d@^1.0.1:
 
 data-uri-to-buffer@^4.0.0:
   version "4.0.0"
-  resolved "https://registry.yarnpkg.com/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz#b5db46aea50f6176428ac05b73be39a57701a64b"
+  resolved "https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.0.tgz"
   integrity sha512-Vr3mLBA8qWmcuschSLAOogKgQ/Jwxulv3RNE4FXnYWRGujzrRWQI4m12fQqRkwX06C0KanhLr4hK+GydchZsaA==
 
 debug@^2.6.9:
@@ -1121,7 +1121,7 @@ fecha@^4.2.0:
 
 fetch-blob@^3.1.2, fetch-blob@^3.1.4:
   version "3.2.0"
-  resolved "https://registry.yarnpkg.com/fetch-blob/-/fetch-blob-3.2.0.tgz#f09b8d4bbd45adc6f0c20b7e787e793e309dcce9"
+  resolved "https://registry.npmjs.org/fetch-blob/-/fetch-blob-3.2.0.tgz"
   integrity sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==
   dependencies:
     node-domexception "^1.0.0"
@@ -1184,7 +1184,7 @@ fn.name@1.x.x:
 
 formdata-polyfill@^4.0.10:
   version "4.0.10"
-  resolved "https://registry.yarnpkg.com/formdata-polyfill/-/formdata-polyfill-4.0.10.tgz#24807c31c9d402e002ab3d8c720144ceb8848423"
+  resolved "https://registry.npmjs.org/formdata-polyfill/-/formdata-polyfill-4.0.10.tgz"
   integrity sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==
   dependencies:
     fetch-blob "^3.1.2"
@@ -1630,7 +1630,7 @@ lodash.merge@^4.6.2:
 
 lodash@^4.17.11, lodash@^4.17.21:
   version "4.17.21"
-  resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
 
 log-symbols@^5.1.0:
@@ -1769,12 +1769,12 @@ node-addon-api@^4.3.0:
 
 node-domexception@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/node-domexception/-/node-domexception-1.0.0.tgz#6888db46a1f71c0b76b3f7555016b63fe64766e5"
+  resolved "https://registry.npmjs.org/node-domexception/-/node-domexception-1.0.0.tgz"
   integrity sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==
 
 node-fetch@^3.2.10:
   version "3.2.10"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-3.2.10.tgz#e8347f94b54ae18b57c9c049ef641cef398a85c8"
+  resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-3.2.10.tgz"
   integrity sha512-MhuzNwdURnZ1Cp4XTazr69K0BTizsBroX7Zx3UgDSVcZYKF/6p0CBe4EUb/hLqmzVhl0UpYfgRljQ4yxE+iCxA==
   dependencies:
     data-uri-to-buffer "^4.0.0"
@@ -1851,7 +1851,7 @@ onetime@^5.1.0:
 
 open@^8.4.0:
   version "8.4.0"
-  resolved "https://registry.yarnpkg.com/open/-/open-8.4.0.tgz#345321ae18f8138f82565a910fdc6b39e8c244f8"
+  resolved "https://registry.npmjs.org/open/-/open-8.4.0.tgz"
   integrity sha512-XgFPPM+B28FtCCgSb9I+s9szOC1vZRSwgWsRUA5ylIxRTgKozqjOCrVOqGsYABPYK5qnfqClxZTFBa8PKt2v6Q==
   dependencies:
     define-lazy-prop "^2.0.0"
@@ -2424,7 +2424,7 @@ wcwidth@^1.0.1:
 
 web-streams-polyfill@^3.0.3:
   version "3.2.1"
-  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz#71c2718c52b45fd49dbeee88634b3a60ceab42a6"
+  resolved "https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz"
   integrity sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==
 
 which-boxed-primitive@^1.0.2:
