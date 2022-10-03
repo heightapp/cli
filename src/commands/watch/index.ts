@@ -12,7 +12,10 @@ import logger from 'helpers/logger';
 import output from 'helpers/output';
 import Service, {ServiceType} from 'helpers/service';
 import inquirer from 'inquirer';
+import createThrottleQueue from 'throttled-queue';
 import {CommandModule} from 'yargs';
+
+const MAX_TASKS_PER_MINUTE = 20;
 
 type Command = CommandModule<
   object,
@@ -34,6 +37,8 @@ const createHandleRepositoryFileChange = ({
   client: Client;
   onStop: () => void;
 }) => {
+  const throttle = createThrottleQueue(MAX_TASKS_PER_MINUTE, 60000);
+
   return async (filePath: string) => {
     await updateTodos({
       filePath,
@@ -41,7 +46,9 @@ const createHandleRepositoryFileChange = ({
       onCreateTask: async (name) => {
         try {
           logger.info(`Create task with name '${name}'`);
-          const newTask = await client.task.create({name, listIds, assigneesIds: [userId]});
+          const newTask = await throttle(() => {
+            return client.task.create({name, listIds, assigneesIds: [userId]});
+          });
           logger.info(`Successfully created task with name '${name}' and index '${newTask.index}'.`);
           return newTask;
         } catch (e) {
